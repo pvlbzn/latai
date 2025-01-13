@@ -1,4 +1,4 @@
-package ui
+package tui
 
 import (
 	"fmt"
@@ -6,24 +6,24 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type model struct {
+type Model struct {
 	choices  []string
 	cursor   int
 	selected map[int]struct{}
 }
 
-func InitialModel() model {
-	return model{
+func InitialModel() Model {
+	return Model{
 		choices:  []string{"Try X", "Try Y", "Try Z"},
 		selected: make(map[int]struct{}),
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) View() string {
+func (m Model) View() string {
 	s := "TODO List\n\n"
 
 	for i, choice := range m.choices {
@@ -45,7 +45,7 @@ func (m model) View() string {
 	return s
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	// Key press?
 	case tea.KeyMsg:
