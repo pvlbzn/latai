@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"log/slog"
-	"os"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/pvlbzn/genlat/evaluator"
 	"github.com/pvlbzn/genlat/prompt"
 	"github.com/pvlbzn/genlat/provider"
@@ -13,15 +11,16 @@ import (
 )
 
 func main() {
-	setLogger()
-
-	if err := runOpenAI(); err != nil {
-		panic(err)
-	}
+	tui.Run()
+	//setLogger(slog.LevelError)
+	//
+	//if err := runOpenAI(); err != nil {
+	//	panic(err)
+	//}
 }
 
-func setLogger() {
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+func setLogger(level slog.Level) {
+	slog.SetLogLoggerLevel(level)
 }
 
 func runOpenAI() error {
@@ -30,66 +29,63 @@ func runOpenAI() error {
 		return err
 	}
 
-	models, err := listModels(p, "gpt-4o-mini-2024-07-18")
+	models, err := p.GetLLMModels("")
 	if err != nil {
 		return err
 	}
 
-	model := models[0]
+	for _, m := range models {
+		_, err := sendMessage(p, m)
+		if err != nil {
+			slog.Error("message error", "error", err, "id", m.ID)
+		}
 
-	if err = sendMessage(p, model); err != nil {
-		return err
-	}
+		prompts, err := prompt.GetPrompts()
+		if err != nil {
+			return err
+		}
 
-	prompts, err := prompt.GetPrompts()
-	if err != nil {
-		return err
-	}
+		eval := evaluator.NewEvaluator(p, m, prompts...)
 
-	for _, prompt := range prompts {
-		fmt.Printf("Prompt: %+v\n", prompt)
-	}
+		metrics, err := eval.Evaluate()
+		if err != nil {
+			return err
+		}
 
-	eval := evaluator.NewEvaluator(p, model, prompts...)
-
-	metrics, err := eval.Evaluate()
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("%+v", metrics)
-
-	return nil
-}
-
-func runBedrock() error {
-	p, err := provider.NewBedrock(provider.DefaultBedrockRegion)
-	if err != nil {
-		return err
-	}
-
-	models, err := listModels(p, "claude")
-	if err != nil {
-		return err
-	}
-
-	if err = sendMessage(p, models[2]); err != nil {
-		return err
+		fmt.Printf("%+v", metrics)
 	}
 
 	return nil
 }
 
-func renderUI() {
-	p := tea.NewProgram(tui.InitialModel())
-	if _, err := p.Run(); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-}
+//func runBedrock() error {
+//	p, err := provider.NewBedrock(provider.DefaultBedrockRegion)
+//	if err != nil {
+//		return err
+//	}
+//
+//	models, err := listModels(p, "")
+//	if err != nil {
+//		return err
+//	}
+//
+//	if err = sendMessage(p, models[2]); err != nil {
+//		return err
+//	}
+//
+//	return nil
+//}
+
+//func renderUI() {
+//	p := tea.NewProgram(tui.InitialModel())
+//	if _, err := p.Run(); err != nil {
+//		fmt.Println("Error:", err)
+//		os.Exit(1)
+//	}
+//}
 
 func listModels(b provider.Provider, filter string) ([]*provider.Model, error) {
-	models, err := b.GetModels(filter)
+	models, err := b.GetLLMModels(filter)
 	if err != nil {
 		return nil, err
 	}
@@ -101,13 +97,11 @@ func listModels(b provider.Provider, filter string) ([]*provider.Model, error) {
 	return models, nil
 }
 
-func sendMessage(b provider.Provider, m *provider.Model) error {
+func sendMessage(b provider.Provider, m *provider.Model) (string, error) {
 	res, err := b.Send("What is your name? Reply in a single word.", m)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	fmt.Println(res)
-
-	return nil
+	return res, nil
 }
