@@ -10,8 +10,11 @@ import (
 // to satisfy. Each service, such as AWS Bedrock or OpenAI, should
 // provide implementation of Provider.
 type Provider interface {
-	// GetModels returns list of available models at provider.
-	GetModels(filter string) ([]*Model, error)
+	// GetLLMModels returns a list of LLM models from memory.
+	GetLLMModels(filter string) ([]*Model, error)
+
+	// GetAllModels returns a list of all available models at provider.
+	GetAllModels(filter string) ([]*Model, error)
 
 	// Measure measures a particular model and returns Metric back.
 	Measure(model *Model, prompt *prompt.Prompt) (*Metric, error)

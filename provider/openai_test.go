@@ -50,7 +50,7 @@ func TestOpenAIGetModels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	models, err := client.GetModels()
+	models, err := client.GetAllModels("")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,18 +70,45 @@ func TestOpenAIGetModels(t *testing.T) {
 	}
 }
 
+func TestOpenAIGetLLMModelsSearch(t *testing.T) {
+	client, err := NewOpenAI("")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	models, err := client.GetLLMModels("o1 mini")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(models) != 2 {
+		t.Errorf("got %d models, expected 2", len(models))
+	}
+
+	if models[0].ID != "o1-mini" {
+		t.Errorf("got %s, expected o1-mini", models[0].ID)
+	}
+
+	if models[1].ID != "o1-mini-2024-09-12" {
+		t.Errorf("got %s, expected o1-mini-2024-09-12", models[1].ID)
+	}
+}
+
 func TestOpenAISend(t *testing.T) {
 	client, err := NewOpenAI("")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	prompt :=
-		"What is your name? Reply in a single word, without punctuation or anything else."
-	expected :=
-		"Assistant"
+	models, err := client.GetLLMModels("o1 mini")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	res, err := client.Send(prompt)
+	prompt := "Reply a single word 'Assistant'"
+	expected := "Assistant"
+
+	res, err := client.Send(prompt, models[0])
 	if err != nil {
 		t.Fatal(err)
 	}
