@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	lg "github.com/charmbracelet/lipgloss"
@@ -21,10 +22,12 @@ type log struct {
 	message string
 }
 
-func newLog(id int, time, message string) log {
+func newLog(id int, message string) log {
+	t := time.Now()
+
 	return log{
 		id:      id,
-		time:    time,
+		time:    fmt.Sprintf("%02d:%02d:%02d", t.Hour(), t.Minute(), t.Second()),
 		message: message,
 	}
 }
@@ -60,7 +63,7 @@ func (m *LoggerComponent) View() string {
 	header := lg.NewStyle().
 		Bold(true).
 		PaddingLeft(1).
-		Render("Log Messages")
+		Render("Events")
 
 	separator := lg.NewStyle().
 		Foreground(lg.Color("240")).
@@ -95,5 +98,5 @@ func (m *LoggerComponent) View() string {
 
 func (m *LoggerComponent) Push(message string) {
 	id := len(m.logs)
-	m.logs = append(m.logs, newLog(id, "now", message))
+	m.logs = append(m.logs, newLog(id, message))
 }

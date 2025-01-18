@@ -11,7 +11,7 @@ import (
 	"github.com/pvlbzn/genlat/prompt"
 )
 
-type updateRowMsg struct {
+type latencyUpdatedMsg struct {
 	id   int
 	data table.Row
 }
@@ -25,14 +25,14 @@ func fetchModelLatencyCmd(m *TableModel, modelRowID int) tea.Cmd {
 			panic(err)
 		}
 
-		eval := evaluator.NewEvaluator(m.openaiProvider, model, prompts...)
+		eval := evaluator.NewEvaluator(m.provider, model, prompts...)
 		res, err := eval.Evaluate()
 		if err != nil {
 			panic(err)
 		}
 
 		// Return an updateRowMsg to update the table row
-		return updateRowMsg{
+		return latencyUpdatedMsg{
 			id: modelRowID,
 			data: table.Row{
 				m.rows[modelRowID][0],                         // ID

@@ -20,8 +20,8 @@ type TableModel struct {
 	rows  []table.Row
 
 	// Initialized services.
-	openaiProvider *provider.OpenAI
-	models         []*provider.Model
+	provider provider.Provider
+	models   []*provider.Model
 
 	// Sorting order.
 	sortAsc bool
@@ -43,6 +43,10 @@ func NewTableModel() TableModel {
 		panic(err)
 	}
 
+	return makeTableModel(p, models)
+}
+
+func makeTableModel(provider provider.Provider, models []*provider.Model) TableModel {
 	width := 72
 	height := len(models) + 1
 	columns := []table.Column{
@@ -81,7 +85,7 @@ func NewTableModel() TableModel {
 		table:           t,
 		rows:            rows,
 		width:           width,
-		openaiProvider:  p,
+		provider:        provider,
 		models:          models,
 		sortAsc:         true,
 		loggerComponent: NewLoggerComponent(width),
@@ -95,9 +99,9 @@ func (m *TableModel) Init() tea.Cmd {
 // Update returns a new model and a command. Commands are functions
 // which designed to perform side effects.
 func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
+
+	// Key press handlers.
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
@@ -109,7 +113,7 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "s":
-			m.loggerComponent.Push("Sorting!")
+			m.loggerComponent.Push(fmt.Sprintf("sorting, order asc: %v", m.sortAsc))
 			return m, sortRowsCmd(m)
 		case "enter":
 			// Get the selected row index
@@ -118,20 +122,32 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				panic(err)
 			}
 
+			// Log event.
+			m.loggerComponent.Push(fmt.Sprintf(
+				"measuring %s latency", m.rows[selectedRowID][1]))
+
+			// Update fields.
 			m.rows[selectedRowID][4] = "..."
 			m.table.SetRows(m.rows)
 
 			// Start the concurrent task and return a command
 			return m, fetchModelLatencyCmd(m, selectedRowID)
 		}
-	case updateRowMsg:
+
+	case latencyUpdatedMsg:
+		// Log event.
+		m.loggerComponent.Push(fmt.Sprintf(
+			"%s latency %s ms", msg.data[1], msg.data[4]))
+
 		// Update the latency column in the selected row
-		m.rows[msg.id][4] = msg.data[4] // Assuming latency is in the 5th column
+		m.rows[msg.id][4] = msg.data[4]
 
 		// Update the table with the modified rows
 		m.table.SetRows(m.rows)
 		return m, nil
 	}
+
+	var cmd tea.Cmd
 
 	// Pass other messages to the table
 	m.table, cmd = m.table.Update(msg)
