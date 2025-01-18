@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -9,14 +10,36 @@ import (
 
 type LoggerComponent struct {
 	width int
-	logs  []string
+	logs  []log
+
+	showLast int
+}
+
+type log struct {
+	id      int
+	time    string
+	message string
+}
+
+func newLog(id int, time, message string) log {
+	return log{
+		id:      id,
+		time:    time,
+		message: message,
+	}
 }
 
 func NewLoggerComponent(width int) *LoggerComponent {
 	return &LoggerComponent{
-		width: width,
-		logs:  []string{},
+		width:    width,
+		logs:     []log{},
+		showLast: 5,
 	}
+}
+
+func (m *LoggerComponent) WithShowLast(n int) *LoggerComponent {
+	m.showLast = n
+	return m
 }
 
 func (m *LoggerComponent) Init() tea.Cmd {
@@ -50,8 +73,15 @@ func (m *LoggerComponent) View() string {
 	if len(m.logs) == 0 {
 		messages = append(messages, rowStyle.Render("No records..."))
 	} else {
-		for _, log := range m.logs {
-			messages = append(messages, rowStyle.Render(log))
+		// Render in a stack style.
+		for i := len(m.logs); i > 0; i-- {
+			if len(m.logs)-i > m.showLast {
+				break
+			}
+
+			log := m.logs[i-1]
+			row := fmt.Sprintf("%d\t%s\t%s", log.id, log.time, log.message)
+			messages = append(messages, rowStyle.Render(row))
 		}
 	}
 
@@ -64,5 +94,6 @@ func (m *LoggerComponent) View() string {
 }
 
 func (m *LoggerComponent) Push(message string) {
-	m.logs = append(m.logs, message)
+	id := len(m.logs)
+	m.logs = append(m.logs, newLog(id, "now", message))
 }
