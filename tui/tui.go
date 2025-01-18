@@ -3,47 +3,49 @@ package tui
 import (
 	"fmt"
 	"os"
-	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/pvlbzn/genlat/evaluator"
-	"github.com/pvlbzn/genlat/prompt"
+	lg "github.com/charmbracelet/lipgloss"
 	"github.com/pvlbzn/genlat/provider"
 )
 
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("#FFFDF5"))
-
 type TableModel struct {
+	// Dimensions.
+	width int
+
+	// Table data.
 	table table.Model
 	rows  []table.Row
 
+	// Initialized services.
 	openaiProvider *provider.OpenAI
 	models         []*provider.Model
 
+	// Sorting order.
 	sortAsc bool
-}
 
-type updateRowMsg struct {
-	id   int
-	data table.Row
+	// Log events.
+	logs []string
 }
 
 func NewTableModel() TableModel {
+	// Initialize providers.
 	p, err := provider.NewOpenAI("")
 	if err != nil {
 		panic(err)
 	}
 
+	// Fetch LLM models to list.
 	models, err := p.GetLLMModels("")
 	if err != nil {
 		panic(err)
 	}
 
+	width := 72
+	height := len(models) + 1
 	columns := []table.Column{
 		{Title: "ID", Width: 2},
 		{Title: "Name", Width: 32},
@@ -54,25 +56,24 @@ func NewTableModel() TableModel {
 
 	var rows []table.Row
 	for i, m := range models {
-		rows = append(rows, table.Row{strconv.Itoa(i), m.Name, m.Provider, m.Vendor, "?"})
+		rows = append(rows, table.Row{strconv.Itoa(i), m.Name, m.Provider, m.Vendor, " "})
 	}
 
 	t := table.New(
 		table.WithColumns(columns),
 		table.WithRows(rows),
 		table.WithFocused(true),
-		table.WithHeight(32))
+		table.WithHeight(height))
 
 	s := table.DefaultStyles()
 	s.Header = s.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
+		BorderStyle(lg.NormalBorder()).
+		BorderForeground(lg.Color("240")).
 		BorderBottom(true).
 		Bold(true)
-
 	s.Selected = s.Selected.
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
+		Foreground(lg.Color("#fff")).
+		Background(lg.Color("#2b5ccc")).
 		Bold(true)
 
 	t.SetStyles(s)
@@ -80,25 +81,21 @@ func NewTableModel() TableModel {
 	return TableModel{
 		table:          t,
 		rows:           rows,
+		width:          width,
 		openaiProvider: p,
 		models:         models,
 		sortAsc:        true,
+		logs:           []string{},
 	}
 }
 
-func (m TableModel) Init() tea.Cmd {
+func (m *TableModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m TableModel) View() string {
-	helpText := " 's' sort by latency | `q` quit"
-
-	return baseStyle.Render(
-		m.table.View() + "\n" +
-			helpText)
-}
-
-func (m TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+// Update returns a new model and a command. Commands are functions
+// which designed to perform side effects.
+func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -113,30 +110,8 @@ func (m TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "s":
-			sort.SliceStable(m.rows, func(i, j int) bool {
-				latencyI, errI := strconv.Atoi(m.rows[i][4])
-				latencyJ, errJ := strconv.Atoi(m.rows[j][4])
-
-				// Handle "..." or invalid values
-				if errI != nil {
-					latencyI = 0 // Assign a large number to represent "..."
-				}
-				if errJ != nil {
-					latencyJ = 0 // Assign a large number to represent "..."
-				}
-
-				if m.sortAsc {
-					return latencyI < latencyJ
-				}
-
-				return latencyI > latencyJ
-			})
-
-			// Toggle sorting order.
-			m.sortAsc = !m.sortAsc
-
-			m.table.SetRows(m.rows)
-			return m, nil
+			m.addLog("Sorting")
+			return m, sortRowsCmd(m)
 		case "enter":
 			// Get the selected row index
 			selectedRowID, err := strconv.Atoi(m.table.SelectedRow()[0])
@@ -148,7 +123,7 @@ func (m TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.table.SetRows(m.rows)
 
 			// Start the concurrent task and return a command
-			return m, fetchLatencyCmd(m, selectedRowID)
+			return m, fetchModelLatencyCmd(m, selectedRowID)
 		}
 	case updateRowMsg:
 		// Update the latency column in the selected row
@@ -164,39 +139,78 @@ func (m TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func fetchLatencyCmd(m TableModel, rowID int) tea.Cmd {
-	return func() tea.Msg {
-		// Process the selected row (e.g., calculate latency or fetch new data)
-		model := m.models[rowID]
-		prompts, err := prompt.GetPrompts()
-		if err != nil {
-			panic(err)
-		}
+func (m *TableModel) View() string {
+	tableView := m.makeTableView()
+	logView := m.makeLogView()
 
-		eval := evaluator.NewEvaluator(m.openaiProvider, model, prompts...)
-		res, err := eval.Evaluate()
-		if err != nil {
-			panic(err)
-		}
+	// Stack vertically views.
+	return lg.JoinVertical(
+		lg.Top,
+		tableView,
+		logView,
+	)
+}
 
-		// Return an updateRowMsg to update the table row
-		return updateRowMsg{
-			id: rowID,
-			data: table.Row{
-				m.rows[rowID][0], // ID
-				m.rows[rowID][1], // Name
-				m.rows[rowID][2], // Provider
-				m.rows[rowID][3], // Vendor
-				fmt.Sprintf("%d", res.Latency.Milliseconds()), // Updated Latency
-			},
+// makeTableView returns a view of table of models and help string.
+func (m *TableModel) makeTableView() string {
+	return lg.NewStyle().
+		BorderStyle(lg.NormalBorder()).
+		BorderForeground(lg.Color("241")).
+		Render(m.table.View() + "\n" + m.makeHelpView())
+}
+
+// makeHelpView returns a view of a single help string.
+func (m *TableModel) makeHelpView() string {
+	return lg.NewStyle().
+		Foreground(lg.Color("241")).
+		Render(fmt.Sprintf(" s: sort by latency | q: quit"))
+}
+
+// makeLogView returns a view of vertically stacked header, separator and rows.
+func (m *TableModel) makeLogView() string {
+	// Log view principal style.
+	s := lg.NewStyle().
+		BorderStyle(lg.NormalBorder()).
+		BorderForeground(lg.Color("241")).
+		Width(m.width)
+
+	header := lg.NewStyle().
+		Bold(true).
+		PaddingLeft(1).
+		Render("Log Messages")
+
+	separator := lg.NewStyle().
+		Foreground(lg.Color("240")).
+		Render(strings.Repeat("─", m.width))
+
+	rowStyle := lg.NewStyle().
+		PaddingLeft(1)
+
+	var messages []string
+	if len(m.logs) == 0 {
+		messages = append(messages, rowStyle.Render("No records..."))
+	} else {
+		for _, log := range m.logs {
+			messages = append(messages, rowStyle.Render(log))
 		}
 	}
+
+	return s.Render(lg.JoinVertical(
+		lg.Top,
+		header,
+		separator,
+		strings.Join(messages, "\n"),
+	))
+}
+
+func (m *TableModel) addLog(message string) {
+	m.logs = append(m.logs, message)
 }
 
 func Run() {
 	m := NewTableModel()
 
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tea.NewProgram(&m).Run(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
