@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -28,7 +27,7 @@ type TableModel struct {
 	sortAsc bool
 
 	// Log events.
-	logs []string
+	loggerComponent *LoggerComponent
 }
 
 func NewTableModel() TableModel {
@@ -79,13 +78,13 @@ func NewTableModel() TableModel {
 	t.SetStyles(s)
 
 	return TableModel{
-		table:          t,
-		rows:           rows,
-		width:          width,
-		openaiProvider: p,
-		models:         models,
-		sortAsc:        true,
-		logs:           []string{},
+		table:           t,
+		rows:            rows,
+		width:           width,
+		openaiProvider:  p,
+		models:          models,
+		sortAsc:         true,
+		loggerComponent: NewLoggerComponent(width),
 	}
 }
 
@@ -110,7 +109,7 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "s":
-			m.addLog("Sorting")
+			m.loggerComponent.Push("Sorting!")
 			return m, sortRowsCmd(m)
 		case "enter":
 			// Get the selected row index
@@ -141,13 +140,12 @@ func (m *TableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *TableModel) View() string {
 	tableView := m.makeTableView()
-	logView := m.makeLogView()
 
 	// Stack vertically views.
 	return lg.JoinVertical(
 		lg.Top,
 		tableView,
-		logView,
+		m.loggerComponent.View(),
 	)
 }
 
@@ -164,47 +162,6 @@ func (m *TableModel) makeHelpView() string {
 	return lg.NewStyle().
 		Foreground(lg.Color("241")).
 		Render(fmt.Sprintf(" s: sort by latency | q: quit"))
-}
-
-// makeLogView returns a view of vertically stacked header, separator and rows.
-func (m *TableModel) makeLogView() string {
-	// Log view principal style.
-	s := lg.NewStyle().
-		BorderStyle(lg.NormalBorder()).
-		BorderForeground(lg.Color("241")).
-		Width(m.width)
-
-	header := lg.NewStyle().
-		Bold(true).
-		PaddingLeft(1).
-		Render("Log Messages")
-
-	separator := lg.NewStyle().
-		Foreground(lg.Color("240")).
-		Render(strings.Repeat("─", m.width))
-
-	rowStyle := lg.NewStyle().
-		PaddingLeft(1)
-
-	var messages []string
-	if len(m.logs) == 0 {
-		messages = append(messages, rowStyle.Render("No records..."))
-	} else {
-		for _, log := range m.logs {
-			messages = append(messages, rowStyle.Render(log))
-		}
-	}
-
-	return s.Render(lg.JoinVertical(
-		lg.Top,
-		header,
-		separator,
-		strings.Join(messages, "\n"),
-	))
-}
-
-func (m *TableModel) addLog(message string) {
-	m.logs = append(m.logs, message)
 }
 
 func Run() {
