@@ -21,7 +21,7 @@ type Provider interface {
 
 	// Send a message to LLM. Can be used stand alone, and is used
 	// by Measure internally to make calls to gather metrics.
-	Send(message string, to *Model) (string, error)
+	Send(message string, to *Model) (*Response, error)
 }
 
 // Model holds key characteristics of a particular model instance.
@@ -41,9 +41,13 @@ type Model struct {
 	Vendor string
 }
 
+type Response struct {
+	Completion string `json:"completion"`
+}
+
 // Metric wraps model data and provides Latency extra field.
 type Metric struct {
 	Model    *Model
 	Latency  time.Duration
-	Response string
+	Response *Response
 }

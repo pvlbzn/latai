@@ -1,7 +1,7 @@
 # Generative AI Latency Measurement
 
 
-## Latency Measurement Strategy
+# Latency Measurement Strategy
 
 **TODO: add description of work**
 
@@ -29,21 +29,39 @@ Prompt caching:
 [^2]: OpenAI claims up to 85% reduced latency with prompt caching for long prompts.
 
 
-### Customizing Prompts
+## Customizing Prompts
 
 **TODO: IMPLEMENT**\
 You can provide your own prompts by creating `~/.genlat/prompts` directory and putting prompts there. This can be useful for custom use cases where prompts or / and use cases differ from standard ones. Doing so be wary of prompt caching.
 
 
-## Providers & Models
+# Providers & Models
 
-### OpenAI
-gpt4o
-gpt4o-mini
+## OpenAI
 
-### AWS Bedrock
-Anthropic
 
-### Microsoft
-https://huggingface.co/microsoft/phi-4
-ollama
+## AWS Bedrock
+
+### Access
+
+> [!NOTE]
+> Make sure you have access to LLM models from your AWS account. They are not enabled by default. You have to navigate to https://REGION.console.aws.amazon.com/bedrock/home?region=REGION#/modelaccess and enable models from the console. Make sure to replace `REGION` with your actual region.
+
+To verify your access you can use `aws` CLI.
+
+```shell
+aws bedrock \
+  list-foundation-models \
+  --region REGION \
+  --profile PROFILE
+```
+
+Substitute `REGION` and `PROFILE` with your data. You can optionally pipe into `jq` to make output more readable.
+
+
+### Models
+
+Even though AWS Bedrock returns lots of models, not all of them can be accessed "as-is". For example AWS Bedrock lists more than 20 Claude-family models, however, only 6 out of them are available without provisioning. Genlat doesn't include models which require special access at the moment.
+
+You can fork this repository and add required provisioned models by adding their ID into `NewBedrock` function [in this file](provider/bedrock.go).
+

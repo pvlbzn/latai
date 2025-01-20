@@ -107,7 +107,7 @@ func (e *Evaluator) Evaluate() (*Evaluation, error) {
 	var latency time.Duration
 	for _, m := range metrics {
 		latency += m.Latency
-		responses = append(responses, m.Response)
+		responses = append(responses, m.Response.Completion)
 	}
 	latency /= time.Duration(len(metrics))
 
