@@ -129,7 +129,7 @@ func (s *OpenAI) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) {
 	}, nil
 }
 
-func (s *OpenAI) Send(message string, to *Model) (string, error) {
+func (s *OpenAI) Send(message string, to *Model) (*Response, error) {
 	slog.Debug("sending message", "message", message, "to", to)
 
 	res, err := s.client.CreateChatCompletion(
@@ -143,8 +143,8 @@ func (s *OpenAI) Send(message string, to *Model) (string, error) {
 
 	if err != nil {
 		slog.Error("failed to send openai message", "error", err, "message", message)
-		return "", err
+		return nil, err
 	}
 
-	return res.Choices[0].Message.Content, nil
+	return &Response{Completion: res.Choices[0].Message.Content}, nil
 }
