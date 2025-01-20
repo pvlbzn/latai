@@ -47,11 +47,8 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 	}
 
 	models := []Model{
-		//{ID: "amazon.titan-tg1-large", Name: "Titan Text Large", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-image-generator-v1:0", Name: "Titan Image Generator G1", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-image-generator-v1", Name: "Titan Image Generator G1", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-image-generator-v2:0", Name: "Titan Image Generator G1 v2", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-text-premier-v1:0", Name: "Titan Text G1 - Premier", Provider: "AWS Bedrock", Vendor: "Amazon"},
+		{ID: "amazon.titan-tg1-large", Name: "Titan Text Large", Provider: "AWS Bedrock", Vendor: "Amazon"},
+		{ID: "amazon.titan-text-premier-v1:0", Name: "Titan Text G1 - Premier", Provider: "AWS Bedrock", Vendor: "Amazon"},
 		//{ID: "amazon.nova-pro-v1:0:300k", Name: "Nova Pro", Provider: "AWS Bedrock", Vendor: "Amazon"},
 		//{ID: "amazon.nova-pro-v1:0", Name: "Nova Pro", Provider: "AWS Bedrock", Vendor: "Amazon"},
 		//{ID: "amazon.nova-lite-v1:0:300k", Name: "Nova Lite", Provider: "AWS Bedrock", Vendor: "Amazon"},
@@ -83,17 +80,6 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 		//{ID: "ai21.jamba-instruct-v1:0", Name: "Jamba-Instruct", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
 		//{ID: "ai21.jamba-1-5-large-v1:0", Name: "Jamba 1.5 Large", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
 		//{ID: "ai21.jamba-1-5-mini-v1:0", Name: "Jamba 1.5 Mini", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-
-		// Claude family.
-		{ID: "anthropic.claude-instant-v1", Name: "Claude Instant v1", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		{ID: "anthropic.claude-v2:1", Name: "Claude v2:1", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		{ID: "anthropic.claude-v2", Name: "Claude v2", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		{ID: "us.anthropic.claude-3-haiku-20240307-v1:0", Name: "Claude 3 Haiku", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		{ID: "us.anthropic.claude-3-sonnet-20240229-v1:0", Name: "Claude 3 Sonnet", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		{ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0", Name: "Claude 3.5 Haiku", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		{ID: "us.anthropic.claude-3-5-sonnet-20240620-v1:0", Name: "Claude 3.5 Sonnet v1", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		{ID: "us.anthropic.claude-3-5-sonnet-20241022-v2:0", Name: "Claude 3.5 Sonnet v2", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-
 		//{ID: "cohere.command-text-v14:7:4k", Name: "Command", Provider: "AWS Bedrock", Vendor: "Cohere"},
 		//{ID: "cohere.command-text-v14", Name: "Command", Provider: "AWS Bedrock", Vendor: "Cohere"},
 		//{ID: "cohere.command-r-v1:0", Name: "Command R", Provider: "AWS Bedrock", Vendor: "Cohere"},
@@ -117,6 +103,17 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 		//{ID: "mistral.mixtral-8x7b-instruct-v0:1", Name: "Mixtral 8x7B Instruct", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 		//{ID: "mistral.mistral-large-2402-v1:0", Name: "Mistral Large (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 		//{ID: "mistral.mistral-small-2402-v1:0", Name: "Mistral Small (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
+
+		// Claude family.
+		//{ID: "anthropic.claude-instant-v1", Name: "Claude Instant v1", Provider: "AWS Bedrock", Vendor: "Anthropic"},
+		//{ID: "anthropic.claude-v2:1", Name: "Claude v2:1", Provider: "AWS Bedrock", Vendor: "Anthropic"},
+		//{ID: "anthropic.claude-v2", Name: "Claude v2", Provider: "AWS Bedrock", Vendor: "Anthropic"},
+		//{ID: "us.anthropic.claude-3-haiku-20240307-v1:0", Name: "Claude 3 Haiku", Provider: "AWS Bedrock", Vendor: "Anthropic"},
+		//{ID: "us.anthropic.claude-3-sonnet-20240229-v1:0", Name: "Claude 3 Sonnet", Provider: "AWS Bedrock", Vendor: "Anthropic"},
+		//{ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0", Name: "Claude 3.5 Haiku", Provider: "AWS Bedrock", Vendor: "Anthropic"},
+		//{ID: "us.anthropic.claude-3-5-sonnet-20240620-v1:0", Name: "Claude 3.5 Sonnet v1", Provider: "AWS Bedrock", Vendor: "Anthropic"},
+		//{ID: "us.anthropic.claude-3-5-sonnet-20241022-v2:0", Name: "Claude 3.5 Sonnet v2", Provider: "AWS Bedrock", Vendor: "Anthropic"},
+
 	}
 
 	return &Bedrock{
@@ -191,7 +188,7 @@ func (s *Bedrock) Send(message string, to *Model) (*Response, error) {
 	// computation to an appropriate vendor handler.
 	switch to.Vendor {
 	case BedrockVendorAmazon:
-		return s.runInferenceAmazon(message, to)
+		return s.runTitanFamilyInference(message, to)
 
 	case BedrockVendorStabilityAI:
 		return s.runInferenceStabilityAI(message, to)
@@ -216,8 +213,51 @@ func (s *Bedrock) Send(message string, to *Model) (*Response, error) {
 	}
 }
 
-func (s *Bedrock) runInferenceAmazon(message string, to *Model) (*Response, error) {
-	panic("not implemented")
+type modelParserFn func(output *bedrockruntime.InvokeModelOutput) (*Response, error)
+
+type titanRequest struct {
+	InputText            string               `json:"inputText"`
+	TextGenerationConfig textGenerationConfig `json:"textGenerationConfig"`
+}
+
+type textGenerationConfig struct {
+	MaxTokenCount int      `json:"maxTokenCount"`
+	Temperature   float32  `json:"temperature"`
+	TopP          float32  `json:"topP"`
+	StopSequences []string `json:"stopSequences"`
+}
+
+type titanResponse struct {
+	Results []struct {
+		OutputText string `json:"outputText"`
+	} `json:"results"`
+}
+
+func (s *Bedrock) runTitanFamilyInference(message string, to *Model) (*Response, error) {
+	data := &titanRequest{
+		InputText: message,
+		TextGenerationConfig: textGenerationConfig{
+			MaxTokenCount: 1024,
+			Temperature:   0.1,
+			TopP:          0.5,
+			StopSequences: []string{},
+		},
+	}
+
+	parser := func(output *bedrockruntime.InvokeModelOutput) (*Response, error) {
+		var res titanResponse
+		err := json.Unmarshal(output.Body, &res)
+		if err != nil {
+			slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *to, "data", data)
+			return nil, err
+		}
+
+		return &Response{
+			Completion: res.Results[0].OutputText,
+		}, nil
+	}
+
+	return s.runInference(data, to, parser)
 }
 
 func (s *Bedrock) runInferenceStabilityAI(message string, to *Model) (*Response, error) {
@@ -227,11 +267,6 @@ func (s *Bedrock) runInferenceStabilityAI(message string, to *Model) (*Response,
 func (s *Bedrock) runInferenceAI21Labs(message string, to *Model) (*Response, error) {
 	panic("not implemented")
 }
-
-//type claudeRequest struct {
-//	Messages []claudeMessage `json:"messages"`
-//	System   string          `json:"system,omitempty"`
-//}
 
 type claudeRequest struct {
 	Messages         []claudeMessage `json:"messages"`
@@ -263,6 +298,36 @@ func (s *Bedrock) runClaudeFamilyInference(message string, to *Model) (*Response
 		TopP:             0.5,
 		AnthropicVersion: "bedrock-2023-05-31",
 	}
+
+	parser := func(output *bedrockruntime.InvokeModelOutput) (*Response, error) {
+		var res claudeResponse
+		err := json.Unmarshal(output.Body, &res)
+		if err != nil {
+			slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *to, "data", data)
+			return nil, err
+		}
+
+		return &Response{
+			Completion: res.Content[0].Text,
+		}, nil
+	}
+
+	return s.runInference(data, to, parser)
+}
+
+func (s *Bedrock) runInferenceCohere(message string, to *Model) (*Response, error) {
+	panic("not implemented")
+}
+
+func (s *Bedrock) runInferenceMeta(message string, to *Model) (*Response, error) {
+	panic("not implemented")
+}
+
+func (s *Bedrock) runInferenceMistralAI(message string, to *Model) (*Response, error) {
+	panic("not implemented")
+}
+
+func (s *Bedrock) runInference(data any, to *Model, withParser modelParserFn) (*Response, error) {
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
 		slog.Debug("failed to marshal model data", "error", err.Error(), "data", data)
@@ -280,26 +345,5 @@ func (s *Bedrock) runClaudeFamilyInference(message string, to *Model) (*Response
 		return nil, err
 	}
 
-	var res claudeResponse
-	err = json.Unmarshal(out.Body, &res)
-	if err != nil {
-		slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *to, "data", data)
-		return nil, err
-	}
-
-	return &Response{
-		Completion: res.Content[0].Text,
-	}, nil
-}
-
-func (s *Bedrock) runInferenceCohere(message string, to *Model) (*Response, error) {
-	panic("not implemented")
-}
-
-func (s *Bedrock) runInferenceMeta(message string, to *Model) (*Response, error) {
-	panic("not implemented")
-}
-
-func (s *Bedrock) runInferenceMistralAI(message string, to *Model) (*Response, error) {
-	panic("not implemented")
+	return withParser(out)
 }
