@@ -35,7 +35,18 @@ Prompt caching:
 You can provide your own prompts by creating `~/.genlat/prompts` directory and putting prompts there. This can be useful for custom use cases where prompts or / and use cases differ from standard ones. Doing so be wary of prompt caching.
 
 
-# Providers & Models
+# Providers & Vendors & Models
+
+Definitions:
+* Provider is a service provider which serves access to model(s) over some API.
+* Vendor is a company-owner of a model which created, trained, and aligned a model.
+* Model is a LLM model with particular properties such as performance, context, languages, etc.
+
+
+Providers are services which serve models over API. Models can be separated by families, for example Claude family of models. Some providers are mono-family, e.g. OpenAI, and follow single unified API for all underlying models. Other providers are multi-family, e.g. AWS Bedrock. Multi-family providers have their API, however particular format of communication depends on the model's family. Vendors may have one or more families of models. Families generally defined by their API, for example if model A and B have the same API and belong to the same vendor then they belong to the same family.
+
+Genlat aggregates models by provider, because provider is the root of the relation, and it is what runs models. However, more frequently than not a model can run on a multiple providers. Thus, there are two APIs - provider API, and model API. To simplify provider API is responsible for transport layer, and model API is responsible for data format. 
+
 
 ## OpenAI
 
