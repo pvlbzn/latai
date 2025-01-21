@@ -24,23 +24,6 @@ type Provider interface {
 	Send(message string, to *Model) (*Response, error)
 }
 
-// Model holds key characteristics of a particular model instance.
-type Model struct {
-	// Model identification, oftentimes model's full name.
-	ID string
-
-	// Model human-readable name.
-	Name string
-
-	// Model service provider, that is name of a service model
-	// is being served from such as AWS, OpenAI, Grok, etc.
-	Provider string
-
-	// Model vendor, that is name of a company which built
-	// the model itself such as Anthropic, Google, Amazon, etc.
-	Vendor string
-}
-
 type Response struct {
 	Completion string `json:"completion"`
 }
@@ -51,3 +34,46 @@ type Metric struct {
 	Latency  time.Duration
 	Response *Response
 }
+
+// Model holds key characteristics of a particular model instance.
+type Model struct {
+	// Model identification, oftentimes model's full name.
+	ID string
+
+	// Model human-readable name.
+	Name string
+
+	// Family represents family of model which often times defines its API.
+	Family ModelFamily
+
+	// Model service provider, that is name of a service model
+	// is being served from such as AWS, OpenAI, Grok, etc.
+	Provider ModelProvider
+
+	// Model vendor, that is name of a company which built
+	// the model itself such as Anthropic, Google, Amazon, etc.
+	Vendor ModelVendor
+}
+
+type ModelFamily string
+type ModelProvider string
+type ModelVendor string
+
+const (
+	ModelFamilyTitan  ModelFamily = "Titan"
+	ModelFamilyNova   ModelFamily = "Nova"
+	ModelFamilyGPT    ModelFamily = "GPT"
+	ModelFamilyClaude ModelFamily = "Claude"
+
+	ModelProviderBedrock ModelProvider = "Bedrock"
+	ModelProviderOpenAI  ModelProvider = "Open AI"
+
+	ModelVendorOpenAI      ModelVendor = "Open AI"
+	ModelVendorAmazon      ModelVendor = "Amazon"
+	ModelVendorStabilityAI ModelVendor = "Stability AI"
+	ModelVendorAI21Labs    ModelVendor = "AI21 Labs"
+	ModelVendorAnthropic   ModelVendor = "Anthropic"
+	ModelVendorCohere      ModelVendor = "Cohere"
+	ModelVendorMeta        ModelVendor = "Meta"
+	ModelVendorMistralAI   ModelVendor = "Mistral AI"
+)

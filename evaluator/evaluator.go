@@ -113,7 +113,7 @@ func (e *Evaluator) Evaluate() (*Evaluation, error) {
 
 	return &Evaluation{
 		ModelName:     e.model.Name,
-		ModelProvider: e.model.Provider,
+		ModelProvider: string(e.model.Provider),
 		Responses:     responses,
 		Latency:       latency,
 	}, nil

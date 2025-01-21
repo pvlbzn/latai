@@ -17,14 +17,6 @@ import (
 const (
 	DefaultAWSRegion  string = "us-east-1"
 	DefaultAWSProfile string = "default"
-
-	BedrockVendorAmazon      string = "Amazon"
-	BedrockVendorStabilityAI string = "Stability AI"
-	BedrockVendorAI21Labs    string = "AI21 Labs"
-	BedrockVendorAnthropic   string = "Anthropic"
-	BedrockVendorCohere      string = "Cohere"
-	BedrockVendorMeta        string = "Meta"
-	BedrockVendorMistralAI   string = "Mistral AI"
 )
 
 type Bedrock struct {
@@ -47,8 +39,6 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 	}
 
 	models := []Model{
-		{ID: "amazon.titan-tg1-large", Name: "Titan Text Large", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		{ID: "amazon.titan-text-premier-v1:0", Name: "Titan Text G1 - Premier", Provider: "AWS Bedrock", Vendor: "Amazon"},
 		//{ID: "amazon.nova-pro-v1:0:300k", Name: "Nova Pro", Provider: "AWS Bedrock", Vendor: "Amazon"},
 		//{ID: "amazon.nova-pro-v1:0", Name: "Nova Pro", Provider: "AWS Bedrock", Vendor: "Amazon"},
 		//{ID: "amazon.nova-lite-v1:0:300k", Name: "Nova Lite", Provider: "AWS Bedrock", Vendor: "Amazon"},
@@ -57,17 +47,6 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 		//{ID: "amazon.nova-reel-v1:0", Name: "Nova Reel", Provider: "AWS Bedrock", Vendor: "Amazon"},
 		//{ID: "amazon.nova-micro-v1:0:128k", Name: "Nova Micro", Provider: "AWS Bedrock", Vendor: "Amazon"},
 		//{ID: "amazon.nova-micro-v1:0", Name: "Nova Micro", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-embed-g1-text-02", Name: "Titan Text Embeddings v2", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-text-lite-v1:0:4k", Name: "Titan Text G1 - Lite", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-text-lite-v1", Name: "Titan Text G1 - Lite", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-text-express-v1:0:8k", Name: "Titan Text G1 - Express", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-text-express-v1", Name: "Titan Text G1 - Express", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-embed-text-v1:2:8k", Name: "Titan Embeddings G1 - Text", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-embed-text-v1", Name: "Titan Embeddings G1 - Text", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-embed-text-v2:0:8k", Name: "Titan Text Embeddings V2", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-embed-text-v2:0", Name: "Titan Text Embeddings V2", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-embed-image-v1:0", Name: "Titan Multimodal Embeddings G1", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.titan-embed-image-v1", Name: "Titan Multimodal Embeddings G1", Provider: "AWS Bedrock", Vendor: "Amazon"},
 		//{ID: "stability.stable-diffusion-xl-v1:0", Name: "SDXL 1.0", Provider: "AWS Bedrock", Vendor: "Stability AI"},
 		//{ID: "stability.stable-diffusion-xl-v1", Name: "SDXL 1.0", Provider: "AWS Bedrock", Vendor: "Stability AI"},
 		//{ID: "ai21.j2-grande-instruct", Name: "J2 Grande Instruct", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
@@ -104,16 +83,21 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 		//{ID: "mistral.mistral-large-2402-v1:0", Name: "Mistral Large (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 		//{ID: "mistral.mistral-small-2402-v1:0", Name: "Mistral Small (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 
-		// Claude family.
-		//{ID: "anthropic.claude-instant-v1", Name: "Claude Instant v1", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		//{ID: "anthropic.claude-v2:1", Name: "Claude v2:1", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		//{ID: "anthropic.claude-v2", Name: "Claude v2", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		//{ID: "us.anthropic.claude-3-haiku-20240307-v1:0", Name: "Claude 3 Haiku", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		//{ID: "us.anthropic.claude-3-sonnet-20240229-v1:0", Name: "Claude 3 Sonnet", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		//{ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0", Name: "Claude 3.5 Haiku", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		//{ID: "us.anthropic.claude-3-5-sonnet-20240620-v1:0", Name: "Claude 3.5 Sonnet v1", Provider: "AWS Bedrock", Vendor: "Anthropic"},
-		//{ID: "us.anthropic.claude-3-5-sonnet-20241022-v2:0", Name: "Claude 3.5 Sonnet v2", Provider: "AWS Bedrock", Vendor: "Anthropic"},
+		// Titan family.
+		{ID: "amazon.titan-tg1-large", Name: "Titan Text Large", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		{ID: "amazon.titan-text-premier-v1:0", Name: "Titan Text G1 - Premier", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		{ID: "amazon.titan-text-lite-v1", Name: "Titan Text G1 - Lite", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		{ID: "amazon.titan-text-express-v1", Name: "Titan Text G1 - Express", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
 
+		// Claude family.
+		{ID: "anthropic.claude-instant-v1", Name: "Claude Instant v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "anthropic.claude-v2:1", Name: "Claude v2:1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "anthropic.claude-v2", Name: "Claude v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-haiku-20240307-v1:0", Name: "Claude 3 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-sonnet-20240229-v1:0", Name: "Claude 3 Sonnet", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0", Name: "Claude 3.5 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-5-sonnet-20240620-v1:0", Name: "Claude 3.5 Sonnet v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-5-sonnet-20241022-v2:0", Name: "Claude 3.5 Sonnet v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
 	}
 
 	return &Bedrock{
@@ -170,7 +154,7 @@ func (s *Bedrock) GetAllModels(filter string) ([]*Model, error) {
 					ID:       *summary.ModelId,
 					Name:     *summary.ModelName,
 					Provider: "AWS Bedrock",
-					Vendor:   *summary.ProviderName,
+					Vendor:   ModelVendor(*summary.ProviderName),
 				})
 		}
 	}
@@ -187,26 +171,26 @@ func (s *Bedrock) Send(message string, to *Model) (*Response, error) {
 	// Internally Send is a routing function which delegates actual
 	// computation to an appropriate vendor handler.
 	switch to.Vendor {
-	case BedrockVendorAmazon:
-		return s.runTitanFamilyInference(message, to)
+	case ModelVendorAmazon:
+		return s.runBedrockInferenceTitanFamily(message, to)
 
-	case BedrockVendorStabilityAI:
-		return s.runInferenceStabilityAI(message, to)
+	case ModelVendorStabilityAI:
+		return s.runBedrockInferenceStabilityAI(message, to)
 
-	case BedrockVendorAI21Labs:
-		return s.runInferenceAI21Labs(message, to)
+	case ModelVendorAI21Labs:
+		return s.runBedrockInferenceAI21Labs(message, to)
 
-	case BedrockVendorAnthropic:
-		return s.runClaudeFamilyInference(message, to)
+	case ModelVendorAnthropic:
+		return s.runBedrockInferenceClaudeFamily(message, to)
 
-	case BedrockVendorCohere:
-		return s.runInferenceCohere(message, to)
+	case ModelVendorCohere:
+		return s.runBedrockInferenceCohere(message, to)
 
-	case BedrockVendorMeta:
-		return s.runInferenceMeta(message, to)
+	case ModelVendorMeta:
+		return s.runBedrockInferenceMeta(message, to)
 
-	case BedrockVendorMistralAI:
-		return s.runInferenceMistralAI(message, to)
+	case ModelVendorMistralAI:
+		return s.runBedrockInferenceMistralAI(message, to)
 
 	default:
 		return nil, fmt.Errorf("unsupported model vendor: %s", to.Vendor)
@@ -233,7 +217,7 @@ type titanResponse struct {
 	} `json:"results"`
 }
 
-func (s *Bedrock) runTitanFamilyInference(message string, to *Model) (*Response, error) {
+func (s *Bedrock) runBedrockInferenceTitanFamily(message string, to *Model) (*Response, error) {
 	data := &titanRequest{
 		InputText: message,
 		TextGenerationConfig: textGenerationConfig{
@@ -260,11 +244,11 @@ func (s *Bedrock) runTitanFamilyInference(message string, to *Model) (*Response,
 	return s.runInference(data, to, parser)
 }
 
-func (s *Bedrock) runInferenceStabilityAI(message string, to *Model) (*Response, error) {
+func (s *Bedrock) runBedrockInferenceStabilityAI(message string, to *Model) (*Response, error) {
 	panic("not implemented")
 }
 
-func (s *Bedrock) runInferenceAI21Labs(message string, to *Model) (*Response, error) {
+func (s *Bedrock) runBedrockInferenceAI21Labs(message string, to *Model) (*Response, error) {
 	panic("not implemented")
 }
 
@@ -288,7 +272,7 @@ type claudeMessage struct {
 	Content string `json:"content"`
 }
 
-func (s *Bedrock) runClaudeFamilyInference(message string, to *Model) (*Response, error) {
+func (s *Bedrock) runBedrockInferenceClaudeFamily(message string, to *Model) (*Response, error) {
 	data := claudeRequest{
 		Messages: []claudeMessage{
 			{Role: "user", Content: message},
@@ -315,15 +299,15 @@ func (s *Bedrock) runClaudeFamilyInference(message string, to *Model) (*Response
 	return s.runInference(data, to, parser)
 }
 
-func (s *Bedrock) runInferenceCohere(message string, to *Model) (*Response, error) {
+func (s *Bedrock) runBedrockInferenceCohere(message string, to *Model) (*Response, error) {
 	panic("not implemented")
 }
 
-func (s *Bedrock) runInferenceMeta(message string, to *Model) (*Response, error) {
+func (s *Bedrock) runBedrockInferenceMeta(message string, to *Model) (*Response, error) {
 	panic("not implemented")
 }
 
-func (s *Bedrock) runInferenceMistralAI(message string, to *Model) (*Response, error) {
+func (s *Bedrock) runBedrockInferenceMistralAI(message string, to *Model) (*Response, error) {
 	panic("not implemented")
 }
 
