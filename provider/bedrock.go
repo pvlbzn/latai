@@ -39,7 +39,7 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 	}
 
 	models := []Model{
-		//{ID: "ai21.j2-mid", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
+		{ID: "ai21.j2-mid", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
 		//{ID: "ai21.j2-mid-v1", Name: "Jurassic-2 Mid", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
 		//{ID: "ai21.j2-ultra", Name: "Jurassic-2 Ultra", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
 		//{ID: "ai21.j2-ultra-v1:0:8k", Name: "Jurassic-2 Ultra", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
@@ -196,8 +196,6 @@ func (s *Bedrock) Send(message string, model *Model) (*Response, error) {
 	}
 }
 
-type modelParserFn func(output *bedrockruntime.InvokeModelOutput) (*Response, error)
-
 type titanRequest struct {
 	InputText            string               `json:"inputText"`
 	TextGenerationConfig textGenerationConfig `json:"textGenerationConfig"`
@@ -226,19 +224,6 @@ func (s *Bedrock) runBedrockInferenceTitanFamily(message string, model *Model) (
 			StopSequences: []string{},
 		},
 	}
-
-	//parser := func(output *bedrockruntime.InvokeModelOutput) (*Response, error) {
-	//	var res titanResponse
-	//	err := json.Unmarshal(output.Body, &res)
-	//	if err != nil {
-	//		slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *to, "data", data)
-	//		return nil, err
-	//	}
-	//
-	//	return &Response{
-	//		Completion: res.Results[0].OutputText,
-	//	}, nil
-	//}
 
 	parser := func(res titanResponse) string {
 		return res.Results[0].OutputText
