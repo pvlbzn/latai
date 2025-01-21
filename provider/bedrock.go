@@ -39,26 +39,14 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 	}
 
 	models := []Model{
-		//{ID: "amazon.nova-pro-v1:0:300k", Name: "Nova Pro", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.nova-pro-v1:0", Name: "Nova Pro", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.nova-lite-v1:0:300k", Name: "Nova Lite", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.nova-lite-v1:0", Name: "Nova Lite", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.nova-canvas-v1:0", Name: "Nova Canvas", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.nova-reel-v1:0", Name: "Nova Reel", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.nova-micro-v1:0:128k", Name: "Nova Micro", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "amazon.nova-micro-v1:0", Name: "Nova Micro", Provider: "AWS Bedrock", Vendor: "Amazon"},
-		//{ID: "stability.stable-diffusion-xl-v1:0", Name: "SDXL 1.0", Provider: "AWS Bedrock", Vendor: "Stability AI"},
-		//{ID: "stability.stable-diffusion-xl-v1", Name: "SDXL 1.0", Provider: "AWS Bedrock", Vendor: "Stability AI"},
-		//{ID: "ai21.j2-grande-instruct", Name: "J2 Grande Instruct", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-		//{ID: "ai21.j2-jumbo-instruct", Name: "J2 Jumbo Instruct", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-		//{ID: "ai21.j2-mid", Name: "Jurassic-2 Mid", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
+		//{ID: "ai21.j2-mid", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
 		//{ID: "ai21.j2-mid-v1", Name: "Jurassic-2 Mid", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
 		//{ID: "ai21.j2-ultra", Name: "Jurassic-2 Ultra", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
 		//{ID: "ai21.j2-ultra-v1:0:8k", Name: "Jurassic-2 Ultra", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
 		//{ID: "ai21.j2-ultra-v1", Name: "Jurassic-2 Ultra", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-		//{ID: "ai21.jamba-instruct-v1:0", Name: "Jamba-Instruct", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
 		//{ID: "ai21.jamba-1-5-large-v1:0", Name: "Jamba 1.5 Large", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
 		//{ID: "ai21.jamba-1-5-mini-v1:0", Name: "Jamba 1.5 Mini", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
+
 		//{ID: "cohere.command-text-v14:7:4k", Name: "Command", Provider: "AWS Bedrock", Vendor: "Cohere"},
 		//{ID: "cohere.command-text-v14", Name: "Command", Provider: "AWS Bedrock", Vendor: "Cohere"},
 		//{ID: "cohere.command-r-v1:0", Name: "Command R", Provider: "AWS Bedrock", Vendor: "Cohere"},
@@ -69,6 +57,7 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 		//{ID: "cohere.embed-english-v3", Name: "Embed English", Provider: "AWS Bedrock", Vendor: "Cohere"},
 		//{ID: "cohere.embed-multilingual-v3:0:512", Name: "Embed Multilingual", Provider: "AWS Bedrock", Vendor: "Cohere"},
 		//{ID: "cohere.embed-multilingual-v3", Name: "Embed Multilingual", Provider: "AWS Bedrock", Vendor: "Cohere"},
+
 		//{ID: "meta.llama3-8b-instruct-v1:0", Name: "Llama 3 8B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
 		//{ID: "meta.llama3-70b-instruct-v1:0", Name: "Llama 3 70B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
 		//{ID: "meta.llama3-1-8b-instruct-v1:0", Name: "Llama 3.1 8B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
@@ -78,26 +67,32 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 		//{ID: "meta.llama3-2-1b-instruct-v1:0", Name: "Llama 3.2 1B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
 		//{ID: "meta.llama3-2-3b-instruct-v1:0", Name: "Llama 3.2 3B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
 		//{ID: "meta.llama3-3-70b-instruct-v1:0", Name: "Llama 3.3 70B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
+
 		//{ID: "mistral.mistral-7b-instruct-v0:2", Name: "Mistral 7B Instruct", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 		//{ID: "mistral.mixtral-8x7b-instruct-v0:1", Name: "Mixtral 8x7B Instruct", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 		//{ID: "mistral.mistral-large-2402-v1:0", Name: "Mistral Large (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 		//{ID: "mistral.mistral-small-2402-v1:0", Name: "Mistral Small (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 
-		// Titan family.
-		{ID: "amazon.titan-tg1-large", Name: "Titan Text Large", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
-		{ID: "amazon.titan-text-premier-v1:0", Name: "Titan Text G1 - Premier", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
-		{ID: "amazon.titan-text-lite-v1", Name: "Titan Text G1 - Lite", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
-		{ID: "amazon.titan-text-express-v1", Name: "Titan Text G1 - Express", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
-
-		// Claude family.
-		{ID: "anthropic.claude-instant-v1", Name: "Claude Instant v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		{ID: "anthropic.claude-v2:1", Name: "Claude v2:1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		{ID: "anthropic.claude-v2", Name: "Claude v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		{ID: "us.anthropic.claude-3-haiku-20240307-v1:0", Name: "Claude 3 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		{ID: "us.anthropic.claude-3-sonnet-20240229-v1:0", Name: "Claude 3 Sonnet", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		{ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0", Name: "Claude 3.5 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		{ID: "us.anthropic.claude-3-5-sonnet-20240620-v1:0", Name: "Claude 3.5 Sonnet v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		{ID: "us.anthropic.claude-3-5-sonnet-20241022-v2:0", Name: "Claude 3.5 Sonnet v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		//// Nova family.
+		// {ID: "amazon.nova-pro-v1:0", Name: "Nova Pro", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
+		//{ID: "amazon.nova-lite-v1:0", Name: "Nova Lite", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
+		//{ID: "amazon.nova-micro-v1:0", Name: "Nova Micro", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
+		//
+		//// Titan family.
+		//{ID: "amazon.titan-tg1-large", Name: "Titan Text Large", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		//{ID: "amazon.titan-text-premier-v1:0", Name: "Titan Text G1 - Premier", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		//{ID: "amazon.titan-text-lite-v1", Name: "Titan Text G1 - Lite", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		//{ID: "amazon.titan-text-express-v1", Name: "Titan Text G1 - Express", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		//
+		//// Claude family.
+		//{ID: "anthropic.claude-instant-v1", Name: "Claude Instant v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		//{ID: "anthropic.claude-v2:1", Name: "Claude v2:1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		//{ID: "anthropic.claude-v2", Name: "Claude v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		//{ID: "us.anthropic.claude-3-haiku-20240307-v1:0", Name: "Claude 3 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		//{ID: "us.anthropic.claude-3-sonnet-20240229-v1:0", Name: "Claude 3 Sonnet", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		//{ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0", Name: "Claude 3.5 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		//{ID: "us.anthropic.claude-3-5-sonnet-20240620-v1:0", Name: "Claude 3.5 Sonnet v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		//{ID: "us.anthropic.claude-3-5-sonnet-20241022-v2:0", Name: "Claude 3.5 Sonnet v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
 	}
 
 	return &Bedrock{
@@ -167,33 +162,37 @@ func (s *Bedrock) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) 
 }
 
 // Send message.
-func (s *Bedrock) Send(message string, to *Model) (*Response, error) {
+func (s *Bedrock) Send(message string, model *Model) (*Response, error) {
 	// Internally Send is a routing function which delegates actual
 	// computation to an appropriate vendor handler.
-	switch to.Vendor {
+	switch model.Vendor {
 	case ModelVendorAmazon:
-		return s.runBedrockInferenceTitanFamily(message, to)
-
-	case ModelVendorStabilityAI:
-		return s.runBedrockInferenceStabilityAI(message, to)
+		switch model.Family {
+		case ModelFamilyNova:
+			return s.runBedrockInferenceNovaFamily(message, model)
+		case ModelFamilyTitan:
+			return s.runBedrockInferenceTitanFamily(message, model)
+		default:
+			return nil, fmt.Errorf("unsupported model family %s", model.Family)
+		}
 
 	case ModelVendorAI21Labs:
-		return s.runBedrockInferenceAI21Labs(message, to)
+		return s.runBedrockInferenceAI21Labs(message, model)
 
 	case ModelVendorAnthropic:
-		return s.runBedrockInferenceClaudeFamily(message, to)
+		return s.runBedrockInferenceClaudeFamily(message, model)
 
 	case ModelVendorCohere:
-		return s.runBedrockInferenceCohere(message, to)
+		return s.runBedrockInferenceCohere(message, model)
 
 	case ModelVendorMeta:
-		return s.runBedrockInferenceMeta(message, to)
+		return s.runBedrockInferenceMeta(message, model)
 
 	case ModelVendorMistralAI:
-		return s.runBedrockInferenceMistralAI(message, to)
+		return s.runBedrockInferenceMistralAI(message, model)
 
 	default:
-		return nil, fmt.Errorf("unsupported model vendor: %s", to.Vendor)
+		return nil, fmt.Errorf("unsupported model vendor: %s", model.Vendor)
 	}
 }
 
@@ -217,7 +216,7 @@ type titanResponse struct {
 	} `json:"results"`
 }
 
-func (s *Bedrock) runBedrockInferenceTitanFamily(message string, to *Model) (*Response, error) {
+func (s *Bedrock) runBedrockInferenceTitanFamily(message string, model *Model) (*Response, error) {
 	data := &titanRequest{
 		InputText: message,
 		TextGenerationConfig: textGenerationConfig{
@@ -228,28 +227,101 @@ func (s *Bedrock) runBedrockInferenceTitanFamily(message string, to *Model) (*Re
 		},
 	}
 
-	parser := func(output *bedrockruntime.InvokeModelOutput) (*Response, error) {
-		var res titanResponse
-		err := json.Unmarshal(output.Body, &res)
-		if err != nil {
-			slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *to, "data", data)
-			return nil, err
-		}
+	//parser := func(output *bedrockruntime.InvokeModelOutput) (*Response, error) {
+	//	var res titanResponse
+	//	err := json.Unmarshal(output.Body, &res)
+	//	if err != nil {
+	//		slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *to, "data", data)
+	//		return nil, err
+	//	}
+	//
+	//	return &Response{
+	//		Completion: res.Results[0].OutputText,
+	//	}, nil
+	//}
 
-		return &Response{
-			Completion: res.Results[0].OutputText,
-		}, nil
+	parser := func(res titanResponse) string {
+		return res.Results[0].OutputText
 	}
 
-	return s.runInference(data, to, parser)
+	return runBedrockInference(s, model, data, parser)
 }
 
-func (s *Bedrock) runBedrockInferenceStabilityAI(message string, to *Model) (*Response, error) {
-	panic("not implemented")
+type novaRequest struct {
+	Messages []novaMessage `json:"messages"`
+}
+
+type novaMessage struct {
+	Role    string `json:"role"`
+	Content []struct {
+		Text string `json:"text"`
+	} `json:"content"`
+}
+
+type novaResponse struct {
+	Output struct {
+		Message struct {
+			Content []struct {
+				Text string `json:"text"`
+			} `json:"content"`
+		} `json:"message"`
+	} `json:"output"`
+}
+
+func (s *Bedrock) runBedrockInferenceNovaFamily(message string, model *Model) (*Response, error) {
+	data := &novaRequest{
+		Messages: []novaMessage{
+			{
+				Role: "user",
+				Content: []struct {
+					Text string `json:"text"`
+				}{{Text: message}},
+			},
+		},
+	}
+
+	parser := func(res novaResponse) string {
+		return res.Output.Message.Content[0].Text
+	}
+
+	return runBedrockInference(s, model, data, parser)
+}
+
+type jurassicRequest struct {
+	Prompt      string  `json:"prompt"`
+	MaxTokens   int     `json:"maxTokens"`
+	Temperature float32 `json:"temperature"`
+	TopP        float32 `json:"topP"`
+}
+
+type jurassicResponse struct {
+	Completions []struct {
+		Data struct {
+			Text string `json:"text"`
+		} `json:"data"`
+	} `json:"completions"`
 }
 
 func (s *Bedrock) runBedrockInferenceAI21Labs(message string, to *Model) (*Response, error) {
-	panic("not implemented")
+	//_ := jurassicRequest{
+	//	Prompt:      message,
+	//	MaxTokens:   1024,
+	//	Temperature: 0.5,
+	//	TopP:        0.5,
+	//}
+
+	//parser := func(output *bedrockruntime.InvokeModelOutput) (*Response, error) {
+	//	var res jurassicResponse
+	//	err := json.Unmarshal(output.Body, &res)
+	//	if err != nil {
+	//		slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *to, "data", data)
+	//		return nil, err
+	//	}
+	//
+	//
+	//}
+
+	return nil, nil
 }
 
 type claudeRequest struct {
@@ -283,20 +355,11 @@ func (s *Bedrock) runBedrockInferenceClaudeFamily(message string, to *Model) (*R
 		AnthropicVersion: "bedrock-2023-05-31",
 	}
 
-	parser := func(output *bedrockruntime.InvokeModelOutput) (*Response, error) {
-		var res claudeResponse
-		err := json.Unmarshal(output.Body, &res)
-		if err != nil {
-			slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *to, "data", data)
-			return nil, err
-		}
-
-		return &Response{
-			Completion: res.Content[0].Text,
-		}, nil
+	parser := func(in claudeResponse) string {
+		return in.Content[0].Text
 	}
 
-	return s.runInference(data, to, parser)
+	return runBedrockInference(s, to, data, parser)
 }
 
 func (s *Bedrock) runBedrockInferenceCohere(message string, to *Model) (*Response, error) {
@@ -311,23 +374,37 @@ func (s *Bedrock) runBedrockInferenceMistralAI(message string, to *Model) (*Resp
 	panic("not implemented")
 }
 
-func (s *Bedrock) runInference(data any, to *Model, withParser modelParserFn) (*Response, error) {
-	dataBytes, err := json.Marshal(data)
+// runBedrockInference is a helper function which wraps common Bedrock API operations.
+// It receives Bedrock client, Model, and two generic types. The first generic
+// is request object to a model, compliant to model's expected data. The second
+// generic is model's output which is provided inside a parser. Parser unpacks
+// model's response type into completion string.
+func runBedrockInference[A, B any](bedrock *Bedrock, withModel *Model, withData A, withParser func(B) string) (*Response, error) {
+	dataBytes, err := json.Marshal(withData)
 	if err != nil {
-		slog.Debug("failed to marshal model data", "error", err.Error(), "data", data)
+		slog.Debug("failed to marshal model data", "error", err.Error(), "data", withData)
 		return nil, err
 	}
 
-	out, err := s.runtime.InvokeModel(context.TODO(), &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(to.ID),
+	out, err := bedrock.runtime.InvokeModel(context.TODO(), &bedrockruntime.InvokeModelInput{
+		ModelId:     aws.String(withModel.ID),
 		ContentType: aws.String("application/json"),
 		Accept:      aws.String("application/json"),
 		Body:        dataBytes,
 	})
 	if err != nil {
-		slog.Debug("failed to invoke model", "error", err.Error(), "model", *to, "data", data)
+		slog.Debug("failed to invoke model", "error", err.Error(), "model", *withModel, "data", withData)
 		return nil, err
 	}
 
-	return withParser(out)
+	var res B
+	err = json.Unmarshal(out.Body, &res)
+	if err != nil {
+		slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *withModel, "data", withData)
+		return nil, err
+	}
+
+	return &Response{
+		Completion: withParser(res),
+	}, nil
 }
