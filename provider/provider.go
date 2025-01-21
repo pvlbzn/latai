@@ -60,10 +60,12 @@ type ModelProvider string
 type ModelVendor string
 
 const (
-	ModelFamilyTitan  ModelFamily = "Titan"
-	ModelFamilyNova   ModelFamily = "Nova"
-	ModelFamilyGPT    ModelFamily = "GPT"
-	ModelFamilyClaude ModelFamily = "Claude"
+	ModelFamilyTitan    ModelFamily = "Titan"
+	ModelFamilyNova     ModelFamily = "Nova"
+	ModelFamilyGPT      ModelFamily = "GPT"
+	ModelFamilyClaude   ModelFamily = "Claude"
+	ModelFamilyJurassic ModelFamily = "Jurassic"
+	ModelFamilyJamba    ModelFamily = "Jamba"
 
 	ModelProviderBedrock ModelProvider = "Bedrock"
 	ModelProviderOpenAI  ModelProvider = "Open AI"

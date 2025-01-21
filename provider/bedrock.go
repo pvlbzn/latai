@@ -39,14 +39,6 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 	}
 
 	models := []Model{
-		{ID: "ai21.j2-mid", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
-		//{ID: "ai21.j2-mid-v1", Name: "Jurassic-2 Mid", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-		//{ID: "ai21.j2-ultra", Name: "Jurassic-2 Ultra", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-		//{ID: "ai21.j2-ultra-v1:0:8k", Name: "Jurassic-2 Ultra", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-		//{ID: "ai21.j2-ultra-v1", Name: "Jurassic-2 Ultra", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-		//{ID: "ai21.jamba-1-5-large-v1:0", Name: "Jamba 1.5 Large", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-		//{ID: "ai21.jamba-1-5-mini-v1:0", Name: "Jamba 1.5 Mini", Provider: "AWS Bedrock", Vendor: "AI21 Labs"},
-
 		//{ID: "cohere.command-text-v14:7:4k", Name: "Command", Provider: "AWS Bedrock", Vendor: "Cohere"},
 		//{ID: "cohere.command-text-v14", Name: "Command", Provider: "AWS Bedrock", Vendor: "Cohere"},
 		//{ID: "cohere.command-r-v1:0", Name: "Command R", Provider: "AWS Bedrock", Vendor: "Cohere"},
@@ -73,26 +65,36 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 		//{ID: "mistral.mistral-large-2402-v1:0", Name: "Mistral Large (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 		//{ID: "mistral.mistral-small-2402-v1:0", Name: "Mistral Small (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
 
-		//// Nova family.
-		// {ID: "amazon.nova-pro-v1:0", Name: "Nova Pro", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
-		//{ID: "amazon.nova-lite-v1:0", Name: "Nova Lite", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
-		//{ID: "amazon.nova-micro-v1:0", Name: "Nova Micro", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
-		//
-		//// Titan family.
-		//{ID: "amazon.titan-tg1-large", Name: "Titan Text Large", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
-		//{ID: "amazon.titan-text-premier-v1:0", Name: "Titan Text G1 - Premier", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
-		//{ID: "amazon.titan-text-lite-v1", Name: "Titan Text G1 - Lite", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
-		//{ID: "amazon.titan-text-express-v1", Name: "Titan Text G1 - Express", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
-		//
-		//// Claude family.
-		//{ID: "anthropic.claude-instant-v1", Name: "Claude Instant v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		//{ID: "anthropic.claude-v2:1", Name: "Claude v2:1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		//{ID: "anthropic.claude-v2", Name: "Claude v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		//{ID: "us.anthropic.claude-3-haiku-20240307-v1:0", Name: "Claude 3 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		//{ID: "us.anthropic.claude-3-sonnet-20240229-v1:0", Name: "Claude 3 Sonnet", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		//{ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0", Name: "Claude 3.5 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		//{ID: "us.anthropic.claude-3-5-sonnet-20240620-v1:0", Name: "Claude 3.5 Sonnet v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
-		//{ID: "us.anthropic.claude-3-5-sonnet-20241022-v2:0", Name: "Claude 3.5 Sonnet v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		// Jamba family.
+		{ID: "ai21.jamba-1-5-large-v1:0", Name: "Jamba 1.5 Large", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs, Family: ModelFamilyJamba},
+		{ID: "ai21.jamba-1-5-mini-v1:0", Name: "Jamba 1.5 Mini", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs, Family: ModelFamilyJamba},
+
+		// Jurassic family.
+		{ID: "ai21.j2-mid", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
+		{ID: "ai21.j2-mid-v1", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
+		{ID: "ai21.j2-ultra", Name: "Jurassic-2 Ultra", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
+		{ID: "ai21.j2-ultra-v1", Name: "Jurassic-2 Ultra", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
+
+		// Nova family.
+		{ID: "amazon.nova-pro-v1:0", Name: "Nova Pro", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
+		{ID: "amazon.nova-lite-v1:0", Name: "Nova Lite", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
+		{ID: "amazon.nova-micro-v1:0", Name: "Nova Micro", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
+
+		//Titan family.
+		{ID: "amazon.titan-tg1-large", Name: "Titan Text Large", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		{ID: "amazon.titan-text-premier-v1:0", Name: "Titan Text G1 - Premier", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		{ID: "amazon.titan-text-lite-v1", Name: "Titan Text G1 - Lite", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+		{ID: "amazon.titan-text-express-v1", Name: "Titan Text G1 - Express", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyTitan},
+
+		// Claude family.
+		{ID: "anthropic.claude-instant-v1", Name: "Claude Instant v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "anthropic.claude-v2:1", Name: "Claude v2:1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "anthropic.claude-v2", Name: "Claude v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-haiku-20240307-v1:0", Name: "Claude 3 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-sonnet-20240229-v1:0", Name: "Claude 3 Sonnet", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-5-haiku-20241022-v1:0", Name: "Claude 3.5 Haiku", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-5-sonnet-20240620-v1:0", Name: "Claude 3.5 Sonnet v1", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
+		{ID: "us.anthropic.claude-3-5-sonnet-20241022-v2:0", Name: "Claude 3.5 Sonnet v2", Provider: ModelProviderBedrock, Vendor: ModelVendorAnthropic},
 	}
 
 	return &Bedrock{
@@ -177,7 +179,14 @@ func (s *Bedrock) Send(message string, model *Model) (*Response, error) {
 		}
 
 	case ModelVendorAI21Labs:
-		return s.runBedrockInferenceAI21Labs(message, model)
+		switch model.Family {
+		case ModelFamilyJurassic:
+			return s.runBedrockInferenceJurassicFamily(message, model)
+		case ModelFamilyJamba:
+			return s.runBedrockInferenceJambaFamily(message, model)
+		default:
+			return nil, fmt.Errorf("unsupported model family %s", model.Family)
+		}
 
 	case ModelVendorAnthropic:
 		return s.runBedrockInferenceClaudeFamily(message, model)
@@ -287,26 +296,50 @@ type jurassicResponse struct {
 	} `json:"completions"`
 }
 
-func (s *Bedrock) runBedrockInferenceAI21Labs(message string, to *Model) (*Response, error) {
-	//_ := jurassicRequest{
-	//	Prompt:      message,
-	//	MaxTokens:   1024,
-	//	Temperature: 0.5,
-	//	TopP:        0.5,
-	//}
+func (s *Bedrock) runBedrockInferenceJurassicFamily(message string, model *Model) (*Response, error) {
+	data := jurassicRequest{
+		Prompt:      message,
+		MaxTokens:   1024,
+		Temperature: 0.5,
+		TopP:        0.5,
+	}
 
-	//parser := func(output *bedrockruntime.InvokeModelOutput) (*Response, error) {
-	//	var res jurassicResponse
-	//	err := json.Unmarshal(output.Body, &res)
-	//	if err != nil {
-	//		slog.Debug("failed to unmarshal response", "error", err.Error(), "model", *to, "data", data)
-	//		return nil, err
-	//	}
-	//
-	//
-	//}
+	parser := func(res jurassicResponse) string {
+		return res.Completions[0].Data.Text
+	}
 
-	return nil, nil
+	return runBedrockInference(s, model, data, parser)
+}
+
+type jambaRequest struct {
+	Messages []jambaMessage `json:"messages"`
+}
+
+type jambaMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type jambaResponse struct {
+	Choices []struct {
+		Message struct {
+			Content string `json:"content"`
+		} `json:"message"`
+	} `json:"choices"`
+}
+
+func (s *Bedrock) runBedrockInferenceJambaFamily(message string, model *Model) (*Response, error) {
+	data := &jambaRequest{
+		Messages: []jambaMessage{
+			{Role: "user", Content: message},
+		},
+	}
+
+	parser := func(res jambaResponse) string {
+		return res.Choices[0].Message.Content
+	}
+
+	return runBedrockInference(s, model, data, parser)
 }
 
 type claudeRequest struct {
