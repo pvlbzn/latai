@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -39,41 +40,28 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 	}
 
 	models := []Model{
-		//{ID: "cohere.command-text-v14:7:4k", Name: "Command", Provider: "AWS Bedrock", Vendor: "Cohere"},
-		//{ID: "cohere.command-text-v14", Name: "Command", Provider: "AWS Bedrock", Vendor: "Cohere"},
-		//{ID: "cohere.command-r-v1:0", Name: "Command R", Provider: "AWS Bedrock", Vendor: "Cohere"},
-		//{ID: "cohere.command-r-plus-v1:0", Name: "Command R+", Provider: "AWS Bedrock", Vendor: "Cohere"},
-		//{ID: "cohere.command-light-text-v14:7:4k", Name: "Command Light", Provider: "AWS Bedrock", Vendor: "Cohere"},
-		//{ID: "cohere.command-light-text-v14", Name: "Command Light", Provider: "AWS Bedrock", Vendor: "Cohere"},
-		//{ID: "cohere.embed-english-v3:0:512", Name: "Embed English", Provider: "AWS Bedrock", Vendor: "Cohere"},
-		//{ID: "cohere.embed-english-v3", Name: "Embed English", Provider: "AWS Bedrock", Vendor: "Cohere"},
-		//{ID: "cohere.embed-multilingual-v3:0:512", Name: "Embed Multilingual", Provider: "AWS Bedrock", Vendor: "Cohere"},
-		//{ID: "cohere.embed-multilingual-v3", Name: "Embed Multilingual", Provider: "AWS Bedrock", Vendor: "Cohere"},
+		// Mistral family.
+		{ID: "mistral.mistral-large-2402-v1:0", Name: "Mistral Large (24.02)", Provider: ModelProviderBedrock, Vendor: ModelVendorMistralAI, Family: ModelFamilyMistral},
+		{ID: "mistral.mistral-small-2402-v1:0", Name: "Mistral Small (24.02)", Provider: ModelProviderBedrock, Vendor: ModelVendorMistralAI, Family: ModelFamilyMistral},
 
-		//{ID: "meta.llama3-8b-instruct-v1:0", Name: "Llama 3 8B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
-		//{ID: "meta.llama3-70b-instruct-v1:0", Name: "Llama 3 70B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
-		//{ID: "meta.llama3-1-8b-instruct-v1:0", Name: "Llama 3.1 8B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
-		//{ID: "meta.llama3-1-70b-instruct-v1:0", Name: "Llama 3.1 70B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
-		//{ID: "meta.llama3-2-11b-instruct-v1:0", Name: "Llama 3.2 11B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
-		//{ID: "meta.llama3-2-90b-instruct-v1:0", Name: "Llama 3.2 90B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
-		//{ID: "meta.llama3-2-1b-instruct-v1:0", Name: "Llama 3.2 1B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
-		//{ID: "meta.llama3-2-3b-instruct-v1:0", Name: "Llama 3.2 3B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
-		//{ID: "meta.llama3-3-70b-instruct-v1:0", Name: "Llama 3.3 70B Instruct", Provider: "AWS Bedrock", Vendor: "Meta"},
+		// Meta family.
+		{ID: "meta.llama3-8b-instruct-v1:0", Name: "Llama 3 8B Instruct", Provider: ModelProviderBedrock, Vendor: ModelVendorMeta, Family: ModelFamilyLlama3},
+		{ID: "meta.llama3-70b-instruct-v1:0", Name: "Llama 3 70B Instruct", Provider: ModelProviderBedrock, Vendor: ModelVendorMeta, Family: ModelFamilyLlama3},
 
-		//{ID: "mistral.mistral-7b-instruct-v0:2", Name: "Mistral 7B Instruct", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
-		//{ID: "mistral.mixtral-8x7b-instruct-v0:1", Name: "Mixtral 8x7B Instruct", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
-		//{ID: "mistral.mistral-large-2402-v1:0", Name: "Mistral Large (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
-		//{ID: "mistral.mistral-small-2402-v1:0", Name: "Mistral Small (24.02)", Provider: "AWS Bedrock", Vendor: "Mistral AI"},
+		// Command family.
+		{ID: "cohere.command-text-v14", Name: "Command", Provider: ModelProviderBedrock, Vendor: ModelVendorCohere, Family: ModelFamilyCommand},
+		{ID: "cohere.command-r-v1:0", Name: "Command R", Provider: ModelProviderBedrock, Vendor: ModelVendorCohere, Family: ModelFamilyCommandR},
+		{ID: "cohere.command-r-plus-v1:0", Name: "Command R+", Provider: ModelProviderBedrock, Vendor: ModelVendorCohere, Family: ModelFamilyCommandR},
+		{ID: "cohere.command-light-text-v14", Name: "Command Light", Provider: ModelProviderBedrock, Vendor: ModelVendorCohere, Family: ModelFamilyCommand},
 
 		// Jamba family.
 		{ID: "ai21.jamba-1-5-large-v1:0", Name: "Jamba 1.5 Large", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs, Family: ModelFamilyJamba},
 		{ID: "ai21.jamba-1-5-mini-v1:0", Name: "Jamba 1.5 Mini", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs, Family: ModelFamilyJamba},
 
 		// Jurassic family.
-		{ID: "ai21.j2-mid", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
-		{ID: "ai21.j2-mid-v1", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
-		{ID: "ai21.j2-ultra", Name: "Jurassic-2 Ultra", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
-		{ID: "ai21.j2-ultra-v1", Name: "Jurassic-2 Ultra", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs},
+		{ID: "ai21.j2-mid", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs, Family: ModelFamilyJurassic},
+		{ID: "ai21.j2-mid-v1", Name: "Jurassic-2 Mid", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs, Family: ModelFamilyJurassic},
+		{ID: "ai21.j2-ultra", Name: "Jurassic-2 Ultra", Provider: ModelProviderBedrock, Vendor: ModelVendorAI21Labs, Family: ModelFamilyJurassic},
 
 		// Nova family.
 		{ID: "amazon.nova-pro-v1:0", Name: "Nova Pro", Provider: ModelProviderBedrock, Vendor: ModelVendorAmazon, Family: ModelFamilyNova},
@@ -159,10 +147,6 @@ func (s *Bedrock) GetAllModels(filter string) ([]*Model, error) {
 	return models, nil
 }
 
-func (s *Bedrock) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) {
-	panic("not implemented")
-}
-
 // Send message.
 func (s *Bedrock) Send(message string, model *Model) (*Response, error) {
 	// Internally Send is a routing function which delegates actual
@@ -192,13 +176,20 @@ func (s *Bedrock) Send(message string, model *Model) (*Response, error) {
 		return s.runBedrockInferenceClaudeFamily(message, model)
 
 	case ModelVendorCohere:
-		return s.runBedrockInferenceCohere(message, model)
+		switch model.Family {
+		case ModelFamilyCommand:
+			return s.runBedrockInferenceCommandFamily(message, model)
+		case ModelFamilyCommandR:
+			return s.runBedrockInferenceCommandRFamily(message, model)
+		default:
+			return nil, fmt.Errorf("unsupported model family %s", model.Family)
+		}
 
 	case ModelVendorMeta:
-		return s.runBedrockInferenceMeta(message, model)
+		return s.runBedrockInferenceLlama3Family(message, model)
 
 	case ModelVendorMistralAI:
-		return s.runBedrockInferenceMistralAI(message, model)
+		return s.runBedrockInferenceMistralFamily(message, model)
 
 	default:
 		return nil, fmt.Errorf("unsupported model vendor: %s", model.Vendor)
@@ -380,16 +371,114 @@ func (s *Bedrock) runBedrockInferenceClaudeFamily(message string, to *Model) (*R
 	return runBedrockInference(s, to, data, parser)
 }
 
-func (s *Bedrock) runBedrockInferenceCohere(message string, to *Model) (*Response, error) {
-	panic("not implemented")
+type commandRRequest struct {
+	Message     string  `json:"message"`
+	Temperature float32 `json:"temperature"`
+	MaxTokens   int     `json:"max_tokens"`
 }
 
-func (s *Bedrock) runBedrockInferenceMeta(message string, to *Model) (*Response, error) {
-	panic("not implemented")
+type commandRResponse struct {
+	Text string `json:"text"`
 }
 
-func (s *Bedrock) runBedrockInferenceMistralAI(message string, to *Model) (*Response, error) {
-	panic("not implemented")
+func (s *Bedrock) runBedrockInferenceCommandRFamily(message string, to *Model) (*Response, error) {
+	data := commandRRequest{
+		Message:     message,
+		Temperature: 0.1,
+		MaxTokens:   1024,
+	}
+
+	parser := func(res commandRResponse) string {
+		return res.Text
+	}
+
+	return runBedrockInference(s, to, data, parser)
+}
+
+type commandRequest struct {
+	Prompt      string  `json:"prompt"`
+	Temperature float32 `json:"temperature"`
+	MaxTokens   int     `json:"max_tokens"`
+}
+
+type commandResponse struct {
+	Text string `json:"text"`
+}
+
+func (s *Bedrock) runBedrockInferenceCommandFamily(message string, to *Model) (*Response, error) {
+	data := commandRequest{
+		Prompt:      message,
+		Temperature: 0.1,
+		MaxTokens:   1024,
+	}
+
+	parser := func(res commandResponse) string {
+		return res.Text
+	}
+
+	return runBedrockInference(s, to, data, parser)
+}
+
+type llama3Request struct {
+	Prompt      string  `json:"prompt"`
+	Temperature float32 `json:"temperature"`
+	TopP        float32 `json:"top_p"`
+	MaxGenLen   int     `json:"max_gen_len"`
+}
+
+type llama3Response struct {
+	Generation           string `json:"generation"`
+	PromptTokenCount     int    `json:"prompt_token_count"`
+	GenerationTokenCount int    `json:"generation_token_count"`
+	StopReason           string `json:"stop_reason"`
+}
+
+func (s *Bedrock) runBedrockInferenceLlama3Family(message string, to *Model) (*Response, error) {
+	data := llama3Request{
+		Prompt:      message,
+		Temperature: 0.1,
+		TopP:        0.5,
+		MaxGenLen:   1024,
+	}
+
+	parser := func(res llama3Response) string {
+		return res.Generation
+	}
+
+	return runBedrockInference(s, to, data, parser)
+}
+
+type mistralRequest struct {
+	Messages    []mistralMessage `json:"messages"`
+	Temperature float32          `json:"temperature"`
+	TopP        float32          `json:"top_p"`
+	MaxTokens   int              `json:"max_tokens"`
+}
+
+type mistralMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type mistralResponse struct {
+	Generation string `json:"generation"`
+}
+
+func (s *Bedrock) runBedrockInferenceMistralFamily(message string, to *Model) (*Response, error) {
+	data := mistralRequest{
+		Messages: []mistralMessage{
+			{Role: "user", Content: message},
+		},
+		Temperature: 0.1,
+		TopP:        0.5,
+		MaxTokens:   1024,
+	}
+
+	parser := func(res mistralResponse) string {
+		return res.Generation
+	}
+
+	return runBedrockInference(s, to, data, parser)
 }
 
 // runBedrockInference is a helper function which wraps common Bedrock API operations.
@@ -424,5 +513,21 @@ func runBedrockInference[A, B any](bedrock *Bedrock, withModel *Model, withData 
 
 	return &Response{
 		Completion: withParser(res),
+	}, nil
+}
+
+func (s *Bedrock) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) {
+	start := time.Now()
+	res, err := s.Send(prompt.Content, model)
+	if err != nil {
+		return nil, err
+	}
+
+	elapsed := time.Since(start)
+
+	return &Metric{
+		Model:    model,
+		Latency:  elapsed,
+		Response: res,
 	}, nil
 }

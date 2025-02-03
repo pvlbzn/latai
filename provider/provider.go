@@ -66,6 +66,10 @@ const (
 	ModelFamilyClaude   ModelFamily = "Claude"
 	ModelFamilyJurassic ModelFamily = "Jurassic"
 	ModelFamilyJamba    ModelFamily = "Jamba"
+	ModelFamilyCommand  ModelFamily = "Command"
+	ModelFamilyCommandR ModelFamily = "Command R"
+	ModelFamilyLlama3   ModelFamily = "Llama 3"
+	ModelFamilyMistral  ModelFamily = "Mistral"
 
 	ModelProviderBedrock ModelProvider = "Bedrock"
 	ModelProviderOpenAI  ModelProvider = "Open AI"
