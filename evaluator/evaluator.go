@@ -85,7 +85,7 @@ func (e *Evaluator) Evaluate() (*Evaluation, error) {
 	// Validate.
 	err := e.validate()
 	if err != nil {
-		slog.Error("failed to run evaluator", "error", err.Error())
+		slog.Debug("failed to run evaluator", "error", err.Error())
 		return nil, err
 	}
 
@@ -98,7 +98,7 @@ func (e *Evaluator) Evaluate() (*Evaluation, error) {
 		metrics, err = e.runUniqueSample()
 	}
 	if err != nil {
-		slog.Error("failed to run a sample", "error", err.Error())
+		slog.Debug("failed to run a sample", "error", err.Error())
 		return nil, err
 	}
 
