@@ -117,10 +117,11 @@ func (s *OpenAI) GetAllModels(filter string) ([]*Model, error) {
 func (s *OpenAI) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) {
 	start := time.Now()
 	res, err := s.Send(prompt.Content, model)
-	elapsed := time.Since(start)
 	if err != nil {
 		return nil, err
 	}
+
+	elapsed := time.Since(start)
 
 	return &Metric{
 		Model:    model,
