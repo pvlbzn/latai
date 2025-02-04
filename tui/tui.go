@@ -1,7 +1,9 @@
 package tui
 
 import (
+	"errors"
 	"fmt"
+	"math"
 	"sort"
 	"strconv"
 
@@ -11,6 +13,10 @@ import (
 	"github.com/pvlbzn/genlat/evaluator"
 	"github.com/pvlbzn/genlat/prompt"
 	"github.com/pvlbzn/genlat/provider"
+)
+
+var (
+	ErrIndexNotFound = errors.New("index not found")
 )
 
 // TUIModel is a root of Genlat TUI application. It holds data and state
@@ -23,9 +29,8 @@ type TUIModel struct {
 	table table.Model
 	rows  []table.Row
 
-	// Initialized services.
-	provider provider.Provider
-	models   []*provider.Model
+	// Initialized providers and their models.
+	providers []*tuiProvider
 
 	// Sorting order.
 	sortAsc bool
@@ -34,26 +39,45 @@ type TUIModel struct {
 	loggerComponent *LoggerComponent
 }
 
-func NewTUIModel() TUIModel {
-	// Initialize providers.
-	p, err := provider.NewOpenAI("")
-	if err != nil {
-		panic(err)
-	}
-
-	// Fetch LLM models to list.
-	models, err := p.GetLLMModels("")
-	if err != nil {
-		panic(err)
-	}
-
-	return makeTableModel(p, models)
+type tuiProvider struct {
+	provider provider.Provider
+	models   []*provider.Model
 }
 
-func makeTableModel(provider provider.Provider, models []*provider.Model) TUIModel {
+func NewTUIModel() (*TUIModel, error) {
+	// Initialize providers.
+	openai, err := provider.NewOpenAI("")
+	if err != nil {
+		return nil, err
+	}
+
+	bedrock, err := provider.NewBedrock(provider.DefaultAWSRegion, provider.DefaultAWSProfile)
+	if err != nil {
+		return nil, err
+	}
+
+	providers := []provider.Provider{openai, bedrock}
+
+	var tuiProviders []*tuiProvider
+	for _, p := range providers {
+		res, err := p.GetLLMModels("")
+		if err != nil {
+			return nil, err
+		}
+		tuiProviders = append(tuiProviders, &tuiProvider{
+			provider: p,
+			models:   res,
+		})
+	}
+
+	return makeTableModel(tuiProviders)
+}
+
+func makeTableModel(tuiProviders []*tuiProvider) (*TUIModel, error) {
 	// TODO: make width dynamic to whatever terminal sized
+	// Main table dimensions.
 	width := 67
-	height := len(models) + 1
+	height := 30
 	columns := []table.Column{
 		{Title: "ID", Width: 2},
 		{Title: "Name", Width: 32},
@@ -61,9 +85,17 @@ func makeTableModel(provider provider.Provider, models []*provider.Model) TUIMod
 		{Title: "Vendor", Width: 8},
 		{Title: "Latency", Width: 7},
 	}
+
+	// Get sequential list of all models.
+	var models []*provider.Model
+	for _, p := range tuiProviders {
+		models = append(models, p.models...)
+	}
+
+	// Create rows
 	var rows []table.Row
 	for i, m := range models {
-		rows = append(rows, table.Row{strconv.Itoa(i), m.Name, m.Provider, m.Vendor, " "})
+		rows = append(rows, table.Row{strconv.Itoa(i), m.Name, string(m.Provider), string(m.Vendor), " "})
 	}
 
 	t := table.New(
@@ -86,21 +118,49 @@ func makeTableModel(provider provider.Provider, models []*provider.Model) TUIMod
 	t.SetStyles(s)
 
 	logger := NewLoggerComponent(width)
-	logger.Push(fmt.Sprintf("loaded %d models", len(models)))
+	logger.Push(fmt.Sprintf("loaded %d providers with %d models", len(tuiProviders), len(rows)))
 
-	return TUIModel{
+	return &TUIModel{
 		table:           t,
 		rows:            rows,
 		width:           width,
-		provider:        provider,
-		models:          models,
+		providers:       tuiProviders,
 		sortAsc:         true,
 		loggerComponent: logger,
-	}
+	}, nil
 }
 
 func (m *TUIModel) Init() tea.Cmd {
 	return nil
+}
+
+func (m *TUIModel) countAllModels() int {
+	var sum int
+	for _, p := range m.providers {
+		sum += len(p.models)
+	}
+
+	return sum
+}
+
+func (m *TUIModel) getModelByRowID(rowID int) (provider.Provider, *provider.Model, error) {
+	type pair struct {
+		provider provider.Provider
+		model    *provider.Model
+	}
+
+	var index []*pair
+	for _, p := range m.providers {
+		for _, m := range p.models {
+			index = append(index, &pair{p.provider, m})
+		}
+	}
+
+	if rowID > len(index) {
+		return nil, nil, ErrIndexNotFound
+	}
+
+	return index[rowID].provider, index[rowID].model, nil
 }
 
 // Update returns a new model and a command. Commands are functions
@@ -137,7 +197,7 @@ func (m *TUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Get the selected row index
 			selectedRowID, err := strconv.Atoi(m.table.SelectedRow()[0])
 			if err != nil {
-				panic(err)
+				m.loggerComponent.Push("error selecting row ID: " + err.Error())
 			}
 
 			// Log event.
@@ -152,7 +212,8 @@ func (m *TUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, fetchModelLatencyCmd(m, selectedRowID)
 
 		case "A": // Run latency measurement for all models.
-			m.loggerComponent.Push(fmt.Sprintf("running %d parallel benchmarks", len(m.models)))
+
+			m.loggerComponent.Push(fmt.Sprintf("running %d parallel benchmarks", m.countAllModels()))
 
 			for _, r := range m.rows {
 				r[4] = "..."
@@ -172,6 +233,11 @@ func (m *TUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table.SetRows(m.rows)
 
 		return m, nil
+
+	case latencyErrMsg:
+		m.loggerComponent.Push(fmt.Sprintf("error measuring %s model: %s", msg.name, msg.err))
+		m.rows[msg.id][4] = "err"
+		m.table.SetRows(m.rows)
 	}
 
 	var cmd tea.Cmd
@@ -216,21 +282,31 @@ type latencyUpdatedMsg struct {
 	latency string
 }
 
-func fetchModelLatencyCmd(m *TUIModel, modelRowID int) tea.Cmd {
+type latencyErrMsg struct {
+	id   int
+	name string
+	err  string
+}
+
+func fetchModelLatencyCmd(tui *TUIModel, modelRowID int) tea.Cmd {
 	return func() tea.Msg {
 		// Process the selected row (e.g., calculate latency or fetch new data)
-		model := m.models[modelRowID]
-		prompts, err := prompt.GetPrompts()
+		p, m, err := tui.getModelByRowID(modelRowID)
 		if err != nil {
-			panic(err)
+			return latencyErrMsg{modelRowID, m.Name, err.Error()}
 		}
 
-		m.loggerComponent.Push(fmt.Sprintf("sampling with %d default prompts", len(prompts)))
+		prompts, err := prompt.GetPrompts()
+		if err != nil {
+			return latencyErrMsg{modelRowID, m.Name, err.Error()}
+		}
 
-		eval := evaluator.NewEvaluator(m.provider, model, prompts...)
+		tui.loggerComponent.Push(fmt.Sprintf("sampling with %d default prompts", len(prompts)))
+
+		eval := evaluator.NewEvaluator(p, m, prompts...)
 		res, err := eval.Evaluate()
 		if err != nil {
-			panic(err)
+			return latencyErrMsg{modelRowID, m.Name, err.Error()}
 		}
 
 		// Return an updateRowMsg to update the table row
@@ -243,10 +319,14 @@ func fetchModelLatencyCmd(m *TUIModel, modelRowID int) tea.Cmd {
 }
 
 // Create a batch of commands to fetch all latency, one model at a time.
-func fetchAllModelLatencyCmd(m *TUIModel) tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.models))
-	for i := range m.models {
-		cmds[i] = fetchModelLatencyCmd(m, i)
+func fetchAllModelLatencyCmd(tui *TUIModel) tea.Cmd {
+	counter := 0
+	cmds := make([]tea.Cmd, tui.countAllModels())
+	for _, p := range tui.providers {
+		for range p.models {
+			cmds[counter] = fetchModelLatencyCmd(tui, counter)
+			counter++
+		}
 	}
 
 	return tea.Batch(cmds...)
@@ -260,15 +340,22 @@ func sortRowsCmd(m *TUIModel) tea.Cmd {
 			latencyI, errI := strconv.Atoi(m.rows[i][4])
 			latencyJ, errJ := strconv.Atoi(m.rows[j][4])
 
+			if m.sortAsc {
+				if errI != nil {
+					latencyI = math.MaxInt
+				}
+				if errJ != nil {
+					latencyJ = math.MaxInt
+				}
+
+				return latencyI < latencyJ
+			}
+
 			if errI != nil {
 				latencyI = 0
 			}
 			if errJ != nil {
 				latencyJ = 0
-			}
-
-			if m.sortAsc {
-				return latencyI < latencyJ
 			}
 
 			return latencyI > latencyJ
