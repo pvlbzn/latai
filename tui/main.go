@@ -8,9 +8,13 @@ import (
 )
 
 func Run() {
-	m := NewTUIModel()
+	m, err := NewTUIModel()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-	if _, err := tea.NewProgram(&m).Run(); err != nil {
+	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
