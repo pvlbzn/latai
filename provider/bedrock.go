@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrock"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/pvlbzn/genlat/prompt"
+	"github.com/pvlbzn/latai/prompt"
 )
 
 const (

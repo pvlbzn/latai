@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/pvlbzn/genlat/prompt"
-	"github.com/pvlbzn/genlat/provider"
+	"github.com/pvlbzn/latai/prompt"
+	"github.com/pvlbzn/latai/provider"
 )
 
 var (

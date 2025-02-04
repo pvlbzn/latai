@@ -20,10 +20,10 @@ type Prompt struct {
 var defaultPrompts embed.FS
 
 // GetPrompts returns prompts for evaluation. Returns either user-defined prompts
-// from `~/.genlat/prompts/*.prompt`, or default embedded prompts.
+// from `~/.latai/prompts/*.prompt`, or default embedded prompts.
 // TODO: user defined prompts.
 func GetPrompts() ([]*Prompt, error) {
-	// TODO: first load files from ~/.genlat/prompt/*, then if empty
+	// TODO: first load files from ~/.latai/prompt/*, then if empty
 	// 	load default prompts.
 	return loadDefaultPrompts()
 }

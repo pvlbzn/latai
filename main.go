@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/pvlbzn/genlat/tui"
+	"github.com/pvlbzn/latai/tui"
 )
 
 func main() {

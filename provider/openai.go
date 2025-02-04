@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pvlbzn/genlat/prompt"
+	"github.com/pvlbzn/latai/prompt"
 	"github.com/sashabaranov/go-openai"
 )
 

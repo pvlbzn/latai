@@ -3,7 +3,7 @@ package provider
 import (
 	"time"
 
-	"github.com/pvlbzn/genlat/prompt"
+	"github.com/pvlbzn/latai/prompt"
 )
 
 // Provider is a core interface for each provider implementation
