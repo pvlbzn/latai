@@ -1,96 +1,114 @@
 package provider
 
-// TestGetModels executes `GetModels` and verifies that models returned
-// correctly. It verifies just a few models out of the list because
-// the list gets updates with some frequency.
-//func TestBedrockGetModels(t *testing.T) {
-//	type model struct {
-//		id       string
-//		model    string
-//		vendor   string
-//		provider string
-//	}
-//	tests := []model{
-//		{
-//			id:       "mistral.mixtral-8x7b-instruct-v0:1",
-//			model:    "Mixtral 8x7B Instruct",
-//			vendor:   "Mistral AI",
-//			provider: "AWS Bedrock",
-//		},
-//		{
-//			id:       "amazon.titan-image-generator-v2:0",
-//			model:    "Titan Image Generator G1 v2",
-//			vendor:   "Amazon,",
-//			provider: "AWS Bedrock",
-//		},
-//		{
-//			id:       "ai21.j2-ultra-v1",
-//			model:    "Jurassic-2 Ultra",
-//			vendor:   "AI21 Labs",
-//			provider: "AWS Bedrock",
-//		},
-//		{
-//			id:       "anthropic.claude-3-sonnet-20240229-v1:0:200k",
-//			model:    "Claude 3 Sonnet",
-//			vendor:   "Anthropic,",
-//			provider: "AWS Bedrock",
-//		},
-//		{
-//			id:       "cohere.command-r-plus-v1:0",
-//			model:    "Command R+",
-//			vendor:   "Cohere,",
-//			provider: "AWS Bedrock",
-//		},
-//	}
-//
-//	client, err := NewBedrock(DefaultBedrockRegion)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	models, err := client.GetModels()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	// Build a lookup table so all the future checks will be
-//	// O(1) instead of O(n) resulting in O(n) + O(n) complexity
-//	// instead of O(n^2)
-//	lookup := make(map[string]model)
-//	for _, m := range models {
-//		lookup[m.ID] = model{
-//			id:       m.ID,
-//			model:    m.Name,
-//			vendor:   m.Vendor,
-//			provider: m.Provider,
-//		}
-//	}
-//
-//	for _, m := range tests {
-//		_, found := lookup[m.id]
-//		if !found {
-//			t.Errorf("model `%s` not found", m)
-//		}
-//	}
-//}
+import (
+	"testing"
+)
 
-//func TestBedrockSend(t *testing.T) {
-//	client, err := NewBedrock(DefaultBedrockRegion)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	prompt :=
-//		"What is your name? Reply in a single word, without punctuation or anything else."
-//	expected :=
-//		"Claude"
-//
-//	res, err := client.Send(prompt)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	if strings.TrimSpace(res) != expected {
-//		t.Errorf("got %s, want %s", res, expected)
-//	}
-//}
+// Mistral Family
+func TestBedrockSendMistralFamily(t *testing.T) {
+	c, err := NewBedrock(DefaultAWSRegion, DefaultAWSProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sendHelper(t, c, "Mistral Large (24.02)")
+	sendHelper(t, c, "Mistral Small (24.02)")
+}
+
+// Meta Family
+func TestBedrockSendLlama3Family(t *testing.T) {
+	c, err := NewBedrock(DefaultAWSRegion, DefaultAWSProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sendHelper(t, c, "Llama 3 8B Instruct")
+	sendHelper(t, c, "Llama 3 70B Instruct")
+}
+
+// Command Family
+func TestBedrockSendCommandFamily(t *testing.T) {
+	c, err := NewBedrock(DefaultAWSRegion, DefaultAWSProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sendHelper(t, c, "Command")
+	sendHelper(t, c, "Command Light")
+}
+
+// Command R Family
+func TestBedrockSendCommandRFamily(t *testing.T) {
+	c, err := NewBedrock(DefaultAWSRegion, DefaultAWSProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sendHelper(t, c, "Command R")
+	sendHelper(t, c, "Command R+")
+}
+
+// Jamba Family
+func TestBedrockSendJambaFamily(t *testing.T) {
+	c, err := NewBedrock(DefaultAWSRegion, DefaultAWSProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sendHelper(t, c, "Jamba 1.5 Large")
+	sendHelper(t, c, "Jamba 1.5 Mini")
+}
+
+// Jurassic Family
+func TestBedrockSendJurassicFamily(t *testing.T) {
+	c, err := NewBedrock(DefaultAWSRegion, DefaultAWSProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sendHelper(t, c, "Jurassic-2 Mid")
+	sendHelper(t, c, "Jurassic-2 Mid")
+	sendHelper(t, c, "Jurassic-2 Ultra")
+}
+
+// Nova Family
+func TestBedrockSendNovaFamily(t *testing.T) {
+	c, err := NewBedrock(DefaultAWSRegion, DefaultAWSProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sendHelper(t, c, "Nova Pro")
+	sendHelper(t, c, "Nova Lite")
+	sendHelper(t, c, "Nova Micro")
+}
+
+// Titan Family
+func TestBedrockSendTitanFamily(t *testing.T) {
+	c, err := NewBedrock(DefaultAWSRegion, DefaultAWSProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sendHelper(t, c, "Titan Text Large")
+	sendHelper(t, c, "Titan Text G1 - Premier")
+	sendHelper(t, c, "Titan Text G1 - Lite")
+	sendHelper(t, c, "Titan Text G1 - Express")
+}
+
+// Claude Family
+func TestBedrockSendClaudeFamily(t *testing.T) {
+	c, err := NewBedrock(DefaultAWSRegion, DefaultAWSProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sendHelper(t, c, "Claude Instant v1")
+	sendHelper(t, c, "Claude v2:1")
+	sendHelper(t, c, "Claude v2")
+	sendHelper(t, c, "Claude 3 Haiku")
+	sendHelper(t, c, "Claude 3 Sonnet")
+	sendHelper(t, c, "Claude 3.5 Haiku")
+	sendHelper(t, c, "Claude 3.5 Sonnet v1")
+	sendHelper(t, c, "Claude 3.5 Sonnet v2")
+}
