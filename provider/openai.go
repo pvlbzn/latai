@@ -71,47 +71,8 @@ func (s *OpenAI) id2Name(id string) string {
 // GetLLMModels returns LLM models only. Filter is applied to search
 // models by their name, e.g. "4o" filter will return 4o family models.
 // Empty filter returns full list of available LLM models.
-func (s *OpenAI) GetLLMModels(filter string) ([]*Model, error) {
-	res := make([]*Model, 0, len(s.models))
-
-	for _, model := range s.models {
-		modelName, query := strings.ToLower(model.Name), strings.ToLower(filter)
-
-		if strings.Contains(modelName, query) {
-			modelCopy := model
-			res = append(res, &modelCopy)
-		}
-	}
-
-	return res, nil
-}
-
-// GetAllModels returns models fetched from OpenAI API. Note that
-// these models are mixed, some models are embeddings, some LLM, some
-// multimodal.
-func (s *OpenAI) GetAllModels(filter string) ([]*Model, error) {
-	res, err := s.client.ListModels(context.TODO())
-	if err != nil {
-		slog.Error("failed to get list of models", "error", err)
-		return nil, err
-	}
-
-	models := make([]*Model, 0, len(res.Models))
-
-	for _, model := range res.Models {
-		modelName, query := s.id2Name(strings.ToLower(model.ID)), strings.ToLower(filter)
-
-		if strings.Contains(modelName, query) {
-			models = append(models, &Model{
-				ID:       model.ID,
-				Name:     modelName,
-				Provider: ModelProviderOpenAI,
-				Vendor:   "OpenAI",
-			})
-		}
-	}
-
-	return models, nil
+func (s *OpenAI) GetLLMModels(filter string) []*Model {
+	return filterModels(s.models, filter)
 }
 
 func (s *OpenAI) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) {

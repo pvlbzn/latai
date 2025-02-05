@@ -11,10 +11,7 @@ import (
 // provide implementation of Provider.
 type Provider interface {
 	// GetLLMModels returns a list of LLM models from memory.
-	GetLLMModels(filter string) ([]*Model, error)
-
-	// GetAllModels returns a list of all available models at provider.
-	GetAllModels(filter string) ([]*Model, error)
+	GetLLMModels(filter string) []*Model
 
 	// Measure measures a particular model and returns Metric back.
 	Measure(model *Model, prompt *prompt.Prompt) (*Metric, error)
@@ -70,16 +67,21 @@ const (
 	ModelFamilyCommandR ModelFamily = "Command R"
 	ModelFamilyLlama3   ModelFamily = "Llama 3"
 	ModelFamilyMistral  ModelFamily = "Mistral"
+	ModelFamilyMixtral  ModelFamily = "Mixtral"
+	ModelFamilyGemma    ModelFamily = "Gemma"
+	ModelFamilyR1       ModelFamily = "R1"
 
 	ModelProviderBedrock ModelProvider = "Bedrock"
 	ModelProviderOpenAI  ModelProvider = "Open AI"
+	ModelProviderGroq    ModelProvider = "Groq"
 
-	ModelVendorOpenAI      ModelVendor = "Open AI"
-	ModelVendorAmazon      ModelVendor = "Amazon"
-	ModelVendorStabilityAI ModelVendor = "Stability AI"
-	ModelVendorAI21Labs    ModelVendor = "AI21 Labs"
-	ModelVendorAnthropic   ModelVendor = "Anthropic"
-	ModelVendorCohere      ModelVendor = "Cohere"
-	ModelVendorMeta        ModelVendor = "Meta"
-	ModelVendorMistralAI   ModelVendor = "Mistral AI"
+	ModelVendorOpenAI    ModelVendor = "Open AI"
+	ModelVendorAmazon    ModelVendor = "Amazon"
+	ModelVendorAI21Labs  ModelVendor = "AI21 Labs"
+	ModelVendorAnthropic ModelVendor = "Anthropic"
+	ModelVendorCohere    ModelVendor = "Cohere"
+	ModelVendorMeta      ModelVendor = "Meta"
+	ModelVendorMistralAI ModelVendor = "Mistral AI"
+	ModelVendorGoogle    ModelVendor = "Google"
+	ModelVendorDeepSeek  ModelVendor = "DeepSeek"
 )

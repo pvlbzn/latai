@@ -16,9 +16,8 @@ import (
 )
 
 const (
-	DefaultAWSRegion string = "us-east-1"
-	// TODO: change this
-	DefaultAWSProfile string = "pavel"
+	DefaultAWSRegion  string = "us-east-1"
+	DefaultAWSProfile string = "pavel" // TODO: change this
 )
 
 type Bedrock struct {
@@ -95,11 +94,18 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 
 // GetLLMModels returns LLM models only which name matches filter.
 // Empty filter string returns all models unfiltered.
-func (s *Bedrock) GetLLMModels(filter string) ([]*Model, error) {
-	// Pre-allocate list enough to hold all models to avoid reallocations.
-	res := make([]*Model, 0, len(s.models))
+func (s *Bedrock) GetLLMModels(filter string) []*Model {
+	return filterModels(s.models, filter)
+}
 
-	for _, model := range s.models {
+// filterModels returns models which model name is a substring of filter
+// string. If filter is empty string then all models returned (empty set
+// is a subset of every set). If no models found then empty list returned.
+func filterModels(models []Model, filter string) []*Model {
+	// Pre-allocate list enough to hold all models to avoid reallocations.
+	res := make([]*Model, 0, len(models))
+
+	for _, model := range models {
 		modelName, query := strings.ToLower(model.Name), strings.ToLower(filter)
 
 		if strings.Contains(modelName, query) {
@@ -108,44 +114,7 @@ func (s *Bedrock) GetLLMModels(filter string) ([]*Model, error) {
 		}
 	}
 
-	return res, nil
-}
-
-// GetAllModels from AWS Bedrock service. Effectively lists available models
-// from API. Note that possibly not all models are LLM models. Some of them
-// are embeddings, instruct models, etc.
-func (s *Bedrock) GetAllModels(filter string) ([]*Model, error) {
-	res, err := s.client.ListFoundationModels(
-		context.TODO(),
-		&bedrock.ListFoundationModelsInput{})
-	if err != nil {
-		slog.Error("couldn't get list of foundation models", "error", err.Error())
-		return nil, err
-	}
-
-	if len(res.ModelSummaries) == 0 {
-		m := "no foundation models found"
-		slog.Error(m)
-		return nil, fmt.Errorf(m)
-	}
-
-	models := make([]*Model, 0, len(res.ModelSummaries))
-	for _, summary := range res.ModelSummaries {
-		modelName, query := strings.ToLower(*summary.ModelName), strings.ToLower(filter)
-
-		if strings.Contains(modelName, query) {
-			models = append(
-				models,
-				&Model{
-					ID:       *summary.ModelId,
-					Name:     *summary.ModelName,
-					Provider: "AWS Bedrock",
-					Vendor:   ModelVendor(*summary.ProviderName),
-				})
-		}
-	}
-
-	return models, nil
+	return res
 }
 
 // Send message.
