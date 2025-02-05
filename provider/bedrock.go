@@ -4,15 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
-	"strings"
-	"time"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrock"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/pvlbzn/latai/prompt"
+	"log/slog"
 )
 
 const (
@@ -96,25 +93,6 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 // Empty filter string returns all models unfiltered.
 func (s *Bedrock) GetLLMModels(filter string) []*Model {
 	return filterModels(s.models, filter)
-}
-
-// filterModels returns models which model name is a substring of filter
-// string. If filter is empty string then all models returned (empty set
-// is a subset of every set). If no models found then empty list returned.
-func filterModels(models []Model, filter string) []*Model {
-	// Pre-allocate list enough to hold all models to avoid reallocations.
-	res := make([]*Model, 0, len(models))
-
-	for _, model := range models {
-		modelName, query := strings.ToLower(model.Name), strings.ToLower(filter)
-
-		if strings.Contains(modelName, query) {
-			modelCopy := model
-			res = append(res, &modelCopy)
-		}
-	}
-
-	return res
 }
 
 // Send message.
@@ -487,17 +465,5 @@ func runBedrockInference[A, B any](bedrock *Bedrock, withModel *Model, withData 
 }
 
 func (s *Bedrock) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) {
-	start := time.Now()
-	res, err := s.Send(prompt.Content, model)
-	if err != nil {
-		return nil, err
-	}
-
-	elapsed := time.Since(start)
-
-	return &Metric{
-		Model:    model,
-		Latency:  elapsed,
-		Response: res,
-	}, nil
+	return measure(s, model, prompt)
 }

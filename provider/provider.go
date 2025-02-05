@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"strings"
 	"time"
 
 	"github.com/pvlbzn/latai/prompt"
@@ -85,3 +86,38 @@ const (
 	ModelVendorGoogle    ModelVendor = "Google"
 	ModelVendorDeepSeek  ModelVendor = "DeepSeek"
 )
+
+func measure(provider Provider, model *Model, prompt *prompt.Prompt) (*Metric, error) {
+	start := time.Now()
+	res, err := provider.Send(prompt.Content, model)
+	if err != nil {
+		return nil, err
+	}
+
+	elapsed := time.Since(start)
+
+	return &Metric{
+		Model:    model,
+		Latency:  elapsed,
+		Response: res,
+	}, nil
+}
+
+// filterModels returns models which model name is a substring of filter
+// string. If filter is empty string then all models returned (empty set
+// is a subset of every set). If no models found then empty list returned.
+func filterModels(models []Model, filter string) []*Model {
+	// Pre-allocate list enough to hold all models to avoid reallocations.
+	res := make([]*Model, 0, len(models))
+
+	for _, model := range models {
+		modelName, query := strings.ToLower(model.Name), strings.ToLower(filter)
+
+		if strings.Contains(modelName, query) {
+			modelCopy := model
+			res = append(res, &modelCopy)
+		}
+	}
+
+	return res
+}

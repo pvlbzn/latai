@@ -3,13 +3,11 @@ package provider
 import (
 	"context"
 	"errors"
+	"github.com/pvlbzn/latai/prompt"
+	"github.com/sashabaranov/go-openai"
 	"log/slog"
 	"os"
 	"strings"
-	"time"
-
-	"github.com/pvlbzn/latai/prompt"
-	"github.com/sashabaranov/go-openai"
 )
 
 type OpenAI struct {
@@ -21,9 +19,7 @@ func NewOpenAI(apiKey string) (*OpenAI, error) {
 	if apiKey == "" {
 		apiKey = os.Getenv("OPENAI_API_KEY")
 		if apiKey == "" {
-			m := "openai api key not found"
-			slog.Error(m)
-			return nil, errors.New(m)
+			return nil, errors.New("openai api key not found")
 		}
 	}
 
@@ -75,22 +71,6 @@ func (s *OpenAI) GetLLMModels(filter string) []*Model {
 	return filterModels(s.models, filter)
 }
 
-func (s *OpenAI) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) {
-	start := time.Now()
-	res, err := s.Send(prompt.Content, model)
-	if err != nil {
-		return nil, err
-	}
-
-	elapsed := time.Since(start)
-
-	return &Metric{
-		Model:    model,
-		Latency:  elapsed,
-		Response: res,
-	}, nil
-}
-
 func (s *OpenAI) Send(message string, to *Model) (*Response, error) {
 	slog.Debug("sending message", "message", message, "to", to)
 
@@ -104,9 +84,12 @@ func (s *OpenAI) Send(message string, to *Model) (*Response, error) {
 		})
 
 	if err != nil {
-		slog.Error("failed to send openai message", "error", err, "message", message)
 		return nil, err
 	}
 
 	return &Response{Completion: res.Choices[0].Message.Content}, nil
+}
+
+func (s *OpenAI) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) {
+	return measure(s, model, prompt)
 }
