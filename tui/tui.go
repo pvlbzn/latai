@@ -18,6 +18,9 @@ var (
 type TUIModel struct {
 	tableComponent  *TableComponent
 	loggerComponent *LoggerComponent
+
+	width  int
+	height int
 }
 
 func NewTUIModel() (*TUIModel, error) {

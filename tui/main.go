@@ -14,7 +14,7 @@ func Run() {
 		os.Exit(1)
 	}
 
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseAllMotion()).Run(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
