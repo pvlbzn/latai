@@ -48,6 +48,21 @@ Providers are services which serve models over API. Models can be separated by f
 Genlat aggregates models by provider, because provider is the root of the relation, and it is what runs models. However, more frequently than not a model can run on a multiple providers. Thus, there are two APIs - provider API, and model API. To simplify provider API is responsible for transport layer, and model API is responsible for data format. 
 
 
+## Rate Limits
+Commonly rate limits measured in following metrics:
+* RPM: Requests per minute
+* RPD: Requests per day
+* TPM: Tokens per minute
+* TPD: Tokens per day
+
+Verify those with your model provider. This information can be found at provider's documentation. You can find these links below. Keep in mind that these rate limits almost always negotiable with your provider, and generally limits applied to models, not provider itself.
+
+Providers:
+* [Groq Rate Limits](https://console.groq.com/docs/rate-limits)
+* TODO OpenAI
+* TODO AWS Bedrock
+
+
 ## OpenAI
 
 
@@ -76,3 +91,8 @@ Even though AWS Bedrock returns lots of models, not all of them can be accessed 
 
 You can fork this repository and add required provisioned models by adding their ID into `NewBedrock` function [in this file](provider/bedrock.go).
 
+# Troubleshooting
+
+## `err` as Latency Value
+
+TODO
