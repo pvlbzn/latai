@@ -24,6 +24,8 @@ type TableComponent struct {
 	// Sorting order.
 	sortAsc bool
 
+	cursor int
+
 	logger *LoggerComponent
 }
 
@@ -53,12 +55,12 @@ func NewTableComponent(providers []provider.Provider, logger *LoggerComponent) *
 }
 
 func makeTableModel(tuiProviders []*tuiProvider) (table.Model, []table.Row) {
-	height := 30
+	height := 28
 	columns := []table.Column{
 		{Title: "ID", Width: 2},
 		{Title: "Name", Width: 32},
 		{Title: "Provider", Width: 8},
-		{Title: "Vendor", Width: 8},
+		{Title: "Vendor", Width: 11},
 		{Title: "Latency", Width: 7},
 	}
 
@@ -96,16 +98,27 @@ func makeTableModel(tuiProviders []*tuiProvider) (table.Model, []table.Row) {
 	return t, rows
 }
 
-func (s *TableComponent) getModelByRowID(rowID int) (provider.Provider, *provider.Model, error) {
-	type pair struct {
-		provider provider.Provider
-		model    *provider.Model
-	}
+type TableRow struct {
+	provider provider.Provider
+	model    *provider.Model
+}
 
-	var index []*pair
+func (s *TableComponent) GetRows() []*TableRow {
+	var rows []*TableRow
 	for _, p := range s.providers {
 		for _, m := range p.models {
-			index = append(index, &pair{p.provider, m})
+			rows = append(rows, &TableRow{p.provider, m})
+		}
+	}
+
+	return rows
+}
+
+func (s *TableComponent) getModelByRowID(rowID int) (provider.Provider, *provider.Model, error) {
+	var index []*TableRow
+	for _, p := range s.providers {
+		for _, m := range p.models {
+			index = append(index, &TableRow{p.provider, m})
 		}
 	}
 
@@ -130,6 +143,8 @@ func (s *TableComponent) Init() tea.Cmd {
 }
 
 func (s *TableComponent) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
 	switch msg := msg.(type) {
 	case latencyUpdatedMsg:
 		// Log event.
@@ -148,11 +163,26 @@ func (s *TableComponent) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.table.SetRows(s.rows)
 	}
 
-	var cmd tea.Cmd
+	var tableCmd tea.Cmd
+	s.table, tableCmd = s.table.Update(msg)
 
-	// Pass other messages to the table
-	s.table, cmd = s.table.Update(msg)
-	return s, cmd
+	return s, tea.Batch(cmd, tableCmd)
+}
+
+func (s *TableComponent) MoveCursorUp() bool {
+	if s.cursor > 0 {
+		s.cursor--
+		return true
+	}
+	return false
+}
+
+func (s *TableComponent) MoveCursorDown() bool {
+	if s.cursor < len(s.rows)-1 {
+		s.cursor++
+		return true
+	}
+	return false
 }
 
 func (s *TableComponent) View() string {
@@ -193,11 +223,23 @@ func (s *TableComponent) SortByLatency() tea.Cmd {
 }
 
 func (s *TableComponent) ScrollTop() {
+	s.cursor = 0
 	s.table.SetCursor(0)
 }
 
 func (s *TableComponent) ScrollBottom() {
+	s.cursor = len(s.rows) - 1
 	s.table.SetCursor(len(s.rows) - 1)
+}
+
+func (s *TableComponent) GetSelectedRow() (int, *provider.Model, error) {
+	selectedRowID, err := strconv.Atoi(s.table.SelectedRow()[0])
+	if err != nil {
+		s.logger.Push("error selecting row ID: " + err.Error())
+	}
+	_, m, err := s.getModelByRowID(selectedRowID)
+
+	return selectedRowID, m, err
 }
 
 func (s *TableComponent) MeasureRowLatency() tea.Cmd {

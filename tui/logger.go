@@ -74,7 +74,11 @@ func (m *LoggerComponent) View() string {
 
 	var messages []string
 	if len(m.logs) == 0 {
-		messages = append(messages, rowStyle.Render("No records..."))
+		messages = append(
+			messages,
+			rowStyle.
+				Foreground(lg.Color("240")).
+				Render("No records..."))
 	} else {
 		// Render in a stack style.
 		for i := len(m.logs); i > 0; i-- {

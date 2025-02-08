@@ -13,10 +13,11 @@ var (
 	ErrIndexNotFound = errors.New("index not found")
 )
 
-// TUIModel is a root of Genlat TUI application. It holds data and state
+// TUIModel is a root of Latai TUI application. It holds data and state
 // for the whole application.
 type TUIModel struct {
 	tableComponent  *TableComponent
+	infoComponent   *InfoComponent
 	loggerComponent *LoggerComponent
 
 	width  int
@@ -42,11 +43,13 @@ func NewTUIModel() (*TUIModel, error) {
 
 	providers := []provider.Provider{openai, bedrock, groq}
 
-	l := NewLoggerComponent(67)
+	l := NewLoggerComponent(70)
 	t := NewTableComponent(providers, l)
+	i := NewInfoComponent(70, t.GetRows())
 
 	return &TUIModel{
 		tableComponent:  t,
+		infoComponent:   i,
 		loggerComponent: l,
 	}, nil
 }
@@ -58,34 +61,52 @@ func (m *TUIModel) Init() tea.Cmd {
 // Update returns a new model and a command. Commands are functions
 // which designed to perform side effects.
 func (m *TUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
+	var cmds []tea.Cmd
 
-	// Key press handlers.
+	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
 			m.tableComponent.ToggleFocus()
 			return m, nil
 
-		case "q", "ctrl+c": // Quit.
+		case "q", "ctrl+c":
+			// Quit.
 			return m, tea.Quit
 
-		case "s": // Sort by latency.
+		case "s":
+			// Sort by latency.
 			m.loggerComponent.Push(fmt.Sprintf("sorting, order asc: %v", m.tableComponent.sortAsc))
 			return m, m.tableComponent.SortByLatency()
 
-		case "J": // Scroll all the way up.
+		case "J":
+			// Scroll all the way up.
 			m.tableComponent.ScrollTop()
-			return m, nil
+			cmds = append(cmds, m.notifySelection())
 
-		case "K": // Scroll all the way down.
+		case "K":
+			// Scroll all the way down.
 			m.tableComponent.ScrollBottom()
-			return m, nil
+			cmds = append(cmds, m.notifySelection())
 
-		case "enter": // Run latency measurement for a selected model.
+		case "j", "down":
+			// One row down.
+			if m.tableComponent.MoveCursorDown() {
+				cmds = append(cmds, m.notifySelection())
+			}
+
+		case "k", "up":
+			// One row up.
+			if m.tableComponent.MoveCursorUp() {
+				cmds = append(cmds, m.notifySelection())
+			}
+
+		case "enter":
+			// Run latency measurement for a selected model.
 			return m, m.tableComponent.MeasureRowLatency()
 
-		case "A": // Run latency measurement for all models.
+		case "A":
+			// Run latency measurement for all models.
 			return m, m.tableComponent.MeasureAllRowLatency()
 		}
 
@@ -98,19 +119,57 @@ func (m *TUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loggerComponent.Push(fmt.Sprintf("error measuring %s model: %s", msg.name, msg.err))
 		m.tableComponent.SetLatencyError(msg.id)
 		return m, nil
+
+	case modelSelectedMsg:
+		m.infoComponent.Update(msg)
+		return m, nil
 	}
 
-	// Pass other messages to the table component.
-	var cmd tea.Cmd
-	m.tableComponent.table, cmd = m.tableComponent.table.Update(msg)
+	// Pass other messages.
+	var tableCmd tea.Cmd
+	m.tableComponent.table, tableCmd = m.tableComponent.table.Update(msg)
+	cmds = append(cmds, tableCmd)
 
-	return m, cmd
+	return m, tea.Batch(cmds...)
+}
+
+type selectedModel struct {
+	id           int
+	providerName provider.ModelProvider
+	vendorName   provider.ModelVendor
+	modelFamily  provider.ModelFamily
+	modelName    string
+}
+
+type modelSelectedMsg struct {
+	selectedModel
+}
+
+// Message components on table row selection change.
+func (m *TUIModel) notifySelection() tea.Cmd {
+	id, model, err := m.tableComponent.GetSelectedRow()
+	if err != nil {
+		m.loggerComponent.Push("error while selecting row: " + err.Error())
+	}
+
+	return func() tea.Msg {
+		return modelSelectedMsg{
+			selectedModel{
+				id:           id,
+				providerName: model.Provider,
+				modelName:    model.Name,
+				vendorName:   model.Vendor,
+				modelFamily:  model.Family,
+			},
+		}
+	}
 }
 
 func (m *TUIModel) View() string {
 	return lg.JoinVertical(
 		lg.Top,
 		m.tableComponent.View(),
+		m.infoComponent.View(),
 		m.loggerComponent.View(),
 	)
 }
