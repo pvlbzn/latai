@@ -3,6 +3,7 @@ package tui
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	lg "github.com/charmbracelet/lipgloss"
@@ -45,7 +46,7 @@ func NewTUIModel() (*TUIModel, error) {
 
 	l := NewLoggerComponent(70)
 	t := NewTableComponent(providers, l)
-	i := NewInfoComponent(70, t.GetRows())
+	i := NewInfoComponent(70)
 
 	return &TUIModel{
 		tableComponent:  t,
@@ -113,6 +114,7 @@ func (m *TUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case latencyUpdatedMsg:
 		m.loggerComponent.Push(fmt.Sprintf("%s latency %s ms", msg.name, msg.latency))
 		m.tableComponent.UpdateLatency(msg.id, msg.latency)
+		m.infoComponent.AddInfo(msg.id, msg.latency, msg.samples)
 		return m, nil
 
 	case latencyErrMsg:
@@ -147,12 +149,13 @@ type modelSelectedMsg struct {
 
 // Message components on table row selection change.
 func (m *TUIModel) notifySelection() tea.Cmd {
-	id, model, err := m.tableComponent.GetSelectedRow()
-	if err != nil {
-		m.loggerComponent.Push("error while selecting row: " + err.Error())
-	}
+	// ✅ Delay selection processing slightly to ensure correct row is fetched
+	return tea.Tick(time.Millisecond*10, func(time.Time) tea.Msg {
+		id, model, err := m.tableComponent.GetSelectedRow()
+		if err != nil {
+			m.loggerComponent.Push("error while selecting row: " + err.Error())
+		}
 
-	return func() tea.Msg {
 		return modelSelectedMsg{
 			selectedModel{
 				id:           id,
@@ -162,7 +165,7 @@ func (m *TUIModel) notifySelection() tea.Cmd {
 				modelFamily:  model.Family,
 			},
 		}
-	}
+	})
 }
 
 func (m *TUIModel) View() string {
@@ -178,6 +181,7 @@ type latencyUpdatedMsg struct {
 	id      int
 	name    string
 	latency string
+	samples []time.Duration
 }
 
 type latencyErrMsg struct {

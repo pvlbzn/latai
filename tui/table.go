@@ -305,7 +305,8 @@ func fetchModelLatencyCmd(t *TableComponent, modelRowID int) tea.Cmd {
 		return latencyUpdatedMsg{
 			id:      modelRowID,
 			name:    res.ModelName,
-			latency: fmt.Sprintf("%d", res.Latency.Milliseconds()),
+			latency: fmt.Sprintf("%d", res.LatencyAvg.Milliseconds()),
+			samples: res.Latency,
 		}
 	}
 }

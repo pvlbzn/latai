@@ -30,7 +30,8 @@ type Evaluation struct {
 	ModelName     string
 	ModelProvider string
 	Responses     []string
-	Latency       time.Duration
+	LatencyAvg    time.Duration
+	Latency       []time.Duration
 }
 
 func NewEvaluator(provider provider.Provider, model *provider.Model, prompts ...*prompt.Prompt) *Evaluator {
@@ -104,17 +105,23 @@ func (e *Evaluator) Evaluate() (*Evaluation, error) {
 
 	// Combine.
 	var responses []string
-	var latency time.Duration
+	var latency []time.Duration
 	for _, m := range metrics {
-		latency += m.Latency
+		latency = append(latency, m.Latency)
 		responses = append(responses, m.Response.Completion)
 	}
-	latency /= time.Duration(len(metrics))
+
+	var sum time.Duration
+	for _, m := range latency {
+		sum += m
+	}
+	avg := sum / time.Duration(len(metrics))
 
 	return &Evaluation{
 		ModelName:     e.model.Name,
 		ModelProvider: string(e.model.Provider),
 		Responses:     responses,
+		LatencyAvg:    avg,
 		Latency:       latency,
 	}, nil
 }
