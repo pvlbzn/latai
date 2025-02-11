@@ -36,6 +36,7 @@ var defaultPrompts embed.FS
 // from `~/.latai/prompts/*.prompt`, or default embedded prompts.
 func GetPrompts() ([]*Prompt, error) {
 	dir := filepath.Join(os.Getenv("HOME"), ".latai", "prompts")
+
 	prompts, err := loadUserPrompts(dir)
 	if err != nil || len(prompts) == 0 {
 		return loadDefaultPrompts()
