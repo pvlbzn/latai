@@ -27,9 +27,9 @@ type Bedrock struct {
 // NewBedrock creates a new AWS Bedrock client with provided region and profile.
 // If you use default region and profile use DefaultAWSRegion
 // and DefaultAWSProfile.
-func NewBedrock(region string, profile string) (*Bedrock, error) {
-	if region == "" && profile == "" {
-		region, profile = getAWSCredentials()
+func NewBedrock(profile string, region string) (*Bedrock, error) {
+	if profile == "" && region == "" {
+		profile, region = getAWSCredentials()
 	}
 
 	cfg, err := config.LoadDefaultConfig(

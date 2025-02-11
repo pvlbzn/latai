@@ -76,9 +76,17 @@ func initializeProvider(l *LoggerComponent, name provider.ModelProvider, newProv
 
 	p, err := newProvider()
 	if err != nil {
-		l.Push(fmt.Sprintf(
-			"%s not loaded. API key not found, `%s_API_KEY` envar is required.",
-			name, strings.ToUpper(string(name))))
+		if name == provider.ModelProviderBedrock {
+			// Bedrock uses a different initialization logic, make message informative
+			// for the use case.
+			l.Push(fmt.Sprintf(
+				"Bedrock not loaded, verify your `AWS_PROFILE` and `AWS_REGION`."))
+		} else {
+			l.Push(fmt.Sprintf(
+				"%s not loaded. API key not found, `%s_API_KEY` envar is required.",
+				name, strings.ToUpper(string(name))))
+		}
+
 		return nil, errProvider
 	}
 
