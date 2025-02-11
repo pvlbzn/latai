@@ -1,7 +1,76 @@
-# Generative AI Latency Measurement
+# Generative AI Latency Measurement TUI
+
+# Usage
+
+Latai currently supports following providers:
+* OpenAI
+* Groq
+* Bedrock
+
+## API Keys
+To access LLMs Latai has to have access to API keys. Each provider is optional. By default, Latai loads all providers and verifies their keys. If keys aren't found provider is not loaded. Therefore, if you don't need some provider just don't add its key. 
+
+TLDR: add following keys and values into your environment and update your terminal environment.
+
+```shell
+# OpenAI API key.
+export OPENAI_API_KEY=
+
+# Groq API key.
+export GROQ_API_KEY=
+
+# AWS Bedrock key. You can specify your AWS profile and region
+# here. If you don't do this, yet you have your AWS CLI installed
+# Latai will use `default` profile and `us-east-1` region.
+export AWS_PROFILE=
+export AWS_REGION=
+```
+
+> [!IMPORTANT]
+> Transparency note. Keys never leave your machine. Latai has no telemetry and does not send your data anywhere. Each provider code has two functions which reach internet. First one is `VerifyAccess` which sends request to list all available models to check API key validity. Second one is `Send` which sends requests to LLMs to measure latency based on default or user prompts.
+
+API key management is provider specific, here are the instructions for each supported provider.
+
+### OpenAI, Groq
+
+OpenAI and Groq use the same API therefore their key management principle is identical. To set keys add these into your environment:
+
+```shell
+# OpenAI API key.
+export OPENAI_API_KEY=
+
+# Groq API key.
+export GROQ_API_KEY=
+```
+
+If you don't need Groq, just don't add key.
+
+
+### AWS Bedrock
+
+AWS uses their own mechanism of authentication which is based on [AWS CLI](https://aws.amazon.com/cli/). Refer to their documentation for details if you need it.
+
+Latai will load your AWS profile in following order:
+1. Access `AWS_PROFILE` and `AWS_REGION` from your environment.
+2. If not found default to the default values `AWS_PROFILE=default`, `AWS_REGION=us-east-1`.
+
+> [!NOTE]
+> Make sure you have access to LLM models from your AWS account. They are not enabled by default. You have to navigate to `https://REGION.console.aws.amazon.com/bedrock/home?region=REGION#/modelaccess` and enable models from the console. Make sure to replace `REGION` with your actual region. [Here is the link](https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/modelaccess) for `us-east-1`.
+
+To verify your access you can use `aws` CLI.
+
+```shell
+aws bedrock \
+  list-foundation-models \
+  --region REGION \
+  --profile PROFILE
+```
+
+Substitute `REGION` and `PROFILE` with your data. You can optionally pipe into `jq` to make output more readable.
 
 
 # Latency Measurement Strategy
+
 
 **TODO: add description of work**
 
