@@ -1,9 +1,7 @@
 package main
 
-import (
-	"github.com/pvlbzn/latai/internal/tui"
-)
+import "github.com/pvlbzn/latai/cmd"
 
 func main() {
-	tui.Run()
+	cmd.Run()
 }
