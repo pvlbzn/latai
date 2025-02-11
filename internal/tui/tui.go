@@ -123,7 +123,7 @@ func (m *TUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "s":
 			// Sort by latency.
-			m.loggerComponent.Push(fmt.Sprintf("sorting, order asc: %v", m.tableComponent.sortAsc))
+			m.loggerComponent.Push(fmt.Sprintf("Sorting, order asc: %v", m.tableComponent.sortAsc))
 			return m, m.tableComponent.SortByLatency()
 
 		case "J":
@@ -164,7 +164,7 @@ func (m *TUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case latencyErrMsg:
-		m.loggerComponent.Push(fmt.Sprintf("error measuring %s model: %s", msg.name, msg.err))
+		m.loggerComponent.Push(fmt.Sprintf("Error measuring %s model: %s", msg.name, msg.err))
 		m.tableComponent.SetLatencyError(msg.id)
 		return m, nil
 
@@ -199,7 +199,7 @@ func (m *TUIModel) notifySelection() tea.Cmd {
 	return tea.Tick(time.Millisecond*10, func(time.Time) tea.Msg {
 		id, model, err := m.tableComponent.GetSelectedRow()
 		if err != nil {
-			m.loggerComponent.Push("error while selecting row: " + err.Error())
+			m.loggerComponent.Push("Error while selecting row: " + err.Error())
 		}
 
 		return modelSelectedMsg{

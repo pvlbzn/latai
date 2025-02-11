@@ -158,7 +158,7 @@ func (s *TableComponent) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return s, nil
 
 	case latencyErrMsg:
-		s.logger.Push(fmt.Sprintf("error measuring %s model: %s", msg.name, msg.err))
+		s.logger.Push(fmt.Sprintf("Error measuring %s model: %s", msg.name, msg.err))
 		s.rows[msg.id][4] = "err"
 		s.table.SetRows(s.rows)
 	}
@@ -235,7 +235,7 @@ func (s *TableComponent) ScrollBottom() {
 func (s *TableComponent) GetSelectedRow() (int, *provider.Model, error) {
 	selectedRowID, err := strconv.Atoi(s.table.SelectedRow()[0])
 	if err != nil {
-		s.logger.Push("error selecting row ID: " + err.Error())
+		s.logger.Push("Error selecting row ID: " + err.Error())
 	}
 	_, m, err := s.getModelByRowID(selectedRowID)
 
@@ -245,11 +245,11 @@ func (s *TableComponent) GetSelectedRow() (int, *provider.Model, error) {
 func (s *TableComponent) MeasureRowLatency() tea.Cmd {
 	selectedRowID, err := strconv.Atoi(s.table.SelectedRow()[0])
 	if err != nil {
-		s.logger.Push("error selecting row ID: " + err.Error())
+		s.logger.Push("Error selecting row ID: " + err.Error())
 	}
 
 	// Log event.
-	s.logger.Push(fmt.Sprintf("measuring %s latency", s.rows[selectedRowID][1]))
+	s.logger.Push(fmt.Sprintf("Measuring %s latency", s.rows[selectedRowID][1]))
 
 	// Update fields.
 	s.rows[selectedRowID][4] = "..."
@@ -260,7 +260,7 @@ func (s *TableComponent) MeasureRowLatency() tea.Cmd {
 }
 
 func (s *TableComponent) MeasureAllRowLatency() tea.Cmd {
-	s.logger.Push(fmt.Sprintf("running %d parallel benchmarks", s.countAllModels()))
+	s.logger.Push(fmt.Sprintf("Running %d parallel benchmarks", s.countAllModels()))
 
 	for _, r := range s.rows {
 		r[4] = "..."
@@ -293,7 +293,10 @@ func fetchModelLatencyCmd(t *TableComponent, modelRowID int) tea.Cmd {
 			return latencyErrMsg{modelRowID, m.Name, err.Error()}
 		}
 
-		t.logger.Push(fmt.Sprintf("sampling with %d default prompts", len(prompts)))
+		if len(prompts) != 0 {
+			// Probe first prompt and see its origin for logging.
+			t.logger.Push(fmt.Sprintf("Sampling with %d %s prompts", len(prompts), prompts[0].Type))
+		}
 
 		eval := evaluator.NewEvaluator(p, m, prompts...)
 		res, err := eval.Evaluate()
