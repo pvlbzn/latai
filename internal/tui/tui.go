@@ -3,11 +3,12 @@ package tui
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	lg "github.com/charmbracelet/lipgloss"
-	"github.com/pvlbzn/latai/provider"
+	"github.com/pvlbzn/latai/internal/provider"
 )
 
 var (
@@ -26,25 +27,42 @@ type TUIModel struct {
 }
 
 func NewTUIModel() (*TUIModel, error) {
-	// Initialize providers.
-	openai, err := provider.NewOpenAI("")
-	if err != nil {
-		return nil, err
-	}
-
-	bedrock, err := provider.NewBedrock(provider.DefaultAWSRegion, provider.DefaultAWSProfile)
-	if err != nil {
-		return nil, err
-	}
-
-	groq, err := provider.NewGroq("")
-	if err != nil {
-		return nil, err
-	}
-
-	providers := []provider.Provider{openai, bedrock, groq}
-
+	var providers []provider.Provider
 	l := NewLoggerComponent(70)
+
+	// Initialize providers.
+	openai, err := initializeProvider(
+		l,
+		provider.ModelProviderOpenAI,
+		func() (provider.Provider, error) {
+			return provider.NewOpenAI("")
+		})
+	if err == nil {
+		providers = append(providers, openai)
+	}
+
+	bedrock, err := initializeProvider(
+		l,
+		provider.ModelProviderBedrock,
+		// TODO: get default profiles
+		func() (provider.Provider, error) {
+
+			return provider.NewBedrock(provider.DefaultAWSRegion, provider.DefaultAWSProfile)
+		})
+	if err == nil {
+		providers = append(providers, bedrock)
+	}
+
+	groq, err := initializeProvider(
+		l,
+		provider.ModelProviderGroq,
+		func() (provider.Provider, error) {
+			return provider.NewGroq("")
+		})
+	if err == nil {
+		providers = append(providers, groq)
+	}
+
 	t := NewTableComponent(providers, l)
 	i := NewInfoComponent(70)
 
@@ -53,6 +71,28 @@ func NewTUIModel() (*TUIModel, error) {
 		infoComponent:   i,
 		loggerComponent: l,
 	}, nil
+}
+
+func initializeProvider(l *LoggerComponent, name provider.ModelProvider, newProvider func() (provider.Provider, error)) (provider.Provider, error) {
+	errProvider := errors.New("provider initialization failed")
+
+	p, err := newProvider()
+	if err != nil {
+		l.Push(fmt.Sprintf(
+			"%s not loaded. API key not found, `%s_API_KEY` envar is required.",
+			name, strings.ToUpper(string(name))))
+		return nil, errProvider
+	}
+
+	if ok := p.VerifyAccess(); !ok {
+		l.Push(fmt.Sprintf(
+			"%s provider is not loaded. API key is invalid, verify your `%s_API_KEY`.",
+			p.Name(), strings.ToUpper(string(p.Name()))))
+		return nil, errProvider
+	}
+
+	l.Push(fmt.Sprintf("%s provider is loaded.", p.Name()))
+	return p, nil
 }
 
 func (m *TUIModel) Init() tea.Cmd {

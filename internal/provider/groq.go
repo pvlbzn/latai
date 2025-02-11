@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/pvlbzn/latai/prompt"
+	"github.com/pvlbzn/latai/internal/prompt"
 	"github.com/sashabaranov/go-openai"
 	"os"
 )
@@ -44,6 +44,27 @@ func NewGroq(apiKey string) (*Groq, error) {
 		client: c,
 		models: models,
 	}, nil
+}
+
+// Name of the provider implementation.
+func (s *Groq) Name() ModelProvider {
+	return ModelProviderGroq
+}
+
+// VerifyAccess validates API key validity. It returns `true` in case if the key
+// is valid, and `false` otherwise. Internally it verifies by calling OpenAI
+// free endpoint of listing all models of their API.
+func (s *Groq) VerifyAccess() bool {
+	models, err := s.client.ListModels(context.Background())
+	if err != nil {
+		return false
+	}
+
+	if len(models.Models) == 0 {
+		return false
+	}
+
+	return true
 }
 
 func (s *Groq) GetLLMModels(filter string) []*Model {

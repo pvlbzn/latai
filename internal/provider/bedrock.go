@@ -8,13 +8,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrock"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/pvlbzn/latai/prompt"
+	"github.com/pvlbzn/latai/internal/prompt"
 	"log/slog"
 )
 
 const (
 	DefaultAWSRegion  string = "us-east-1"
-	DefaultAWSProfile string = "pavel" // TODO: change this
+	DefaultAWSProfile string = "default" // TODO: change
 )
 
 type Bedrock struct {
@@ -87,6 +87,27 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 		runtime: bedrockruntime.NewFromConfig(cfg),
 		models:  models,
 	}, nil
+}
+
+// Name of the provider implementation.
+func (s *Bedrock) Name() ModelProvider {
+	return ModelProviderBedrock
+}
+
+// VerifyAccess validates API key validity. It returns `true` in case if the key
+// is valid, and `false` otherwise. Internally it verifies by calling OpenAI
+// free endpoint of listing all models of their API.
+func (s *Bedrock) VerifyAccess() bool {
+	models, err := s.client.ListFoundationModels(context.Background(), &bedrock.ListFoundationModelsInput{})
+	if err != nil {
+		return false
+	}
+
+	if len(models.ModelSummaries) == 0 {
+		return false
+	}
+
+	return true
 }
 
 // GetLLMModels returns LLM models only which name matches filter.

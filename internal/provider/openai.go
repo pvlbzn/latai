@@ -3,7 +3,7 @@ package provider
 import (
 	"context"
 	"errors"
-	"github.com/pvlbzn/latai/prompt"
+	"github.com/pvlbzn/latai/internal/prompt"
 	"github.com/sashabaranov/go-openai"
 	"log/slog"
 	"os"
@@ -62,6 +62,27 @@ func (s *OpenAI) id2Name(id string) string {
 		elems[i] = strings.ToUpper(elems[i][:1]) + elems[i][1:]
 	}
 	return strings.Join(elems, " ")
+}
+
+// Name of the provider implementation.
+func (s *OpenAI) Name() ModelProvider {
+	return ModelProviderOpenAI
+}
+
+// VerifyAccess validates API key validity. It returns `true` in case if the key
+// is valid, and `false` otherwise. Internally it verifies by calling OpenAI
+// free endpoint of listing all models of their API.
+func (s *OpenAI) VerifyAccess() bool {
+	models, err := s.client.ListModels(context.Background())
+	if err != nil {
+		return false
+	}
+
+	if len(models.Models) == 0 {
+		return false
+	}
+
+	return true
 }
 
 // GetLLMModels returns LLM models only. Filter is applied to search

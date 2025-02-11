@@ -4,13 +4,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pvlbzn/latai/prompt"
+	"github.com/pvlbzn/latai/internal/prompt"
 )
 
 // Provider is a core interface for each provider implementation
 // to satisfy. Each service, such as AWS Bedrock or OpenAI, should
 // provide implementation of Provider.
 type Provider interface {
+	// Name of the provider.
+	Name() ModelProvider
+
 	// GetLLMModels returns a list of LLM models from memory.
 	GetLLMModels(filter string) []*Model
 
@@ -20,6 +23,10 @@ type Provider interface {
 	// Send a message to LLM. Can be used stand alone, and is used
 	// by Measure internally to make calls to gather metrics.
 	Send(message string, to *Model) (*Response, error)
+
+	// VerifyAccess validates whether user provider API key,
+	// and whether this API key is functioning.
+	VerifyAccess() bool
 }
 
 type Response struct {
