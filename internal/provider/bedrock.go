@@ -10,11 +10,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/pvlbzn/latai/internal/prompt"
 	"log/slog"
+	"os"
 )
 
 const (
 	DefaultAWSRegion  string = "us-east-1"
-	DefaultAWSProfile string = "default" // TODO: change
+	DefaultAWSProfile string = "default"
 )
 
 type Bedrock struct {
@@ -27,12 +28,15 @@ type Bedrock struct {
 // If you use default region and profile use DefaultAWSRegion
 // and DefaultAWSProfile.
 func NewBedrock(region string, profile string) (*Bedrock, error) {
+	if region == "" && profile == "" {
+		region, profile = getAWSCredentials()
+	}
+
 	cfg, err := config.LoadDefaultConfig(
 		context.Background(),
 		config.WithRegion(region),
 		config.WithSharedConfigProfile(profile))
 	if err != nil {
-		slog.Error("failed to load bedrock default configuration", "error", err)
 		return nil, err
 	}
 
@@ -87,6 +91,20 @@ func NewBedrock(region string, profile string) (*Bedrock, error) {
 		runtime: bedrockruntime.NewFromConfig(cfg),
 		models:  models,
 	}, nil
+}
+
+func getAWSCredentials() (string, string) {
+	profile := os.Getenv("AWS_PROFILE")
+	if profile == "" {
+		profile = DefaultAWSProfile
+	}
+
+	region := os.Getenv("AWS_REGION")
+	if region == "" {
+		region = DefaultAWSRegion
+	}
+
+	return profile, region
 }
 
 // Name of the provider implementation.

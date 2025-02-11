@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/pvlbzn/latai/internal/prompt"
 	"github.com/sashabaranov/go-openai"
@@ -19,7 +18,7 @@ func NewGroq(apiKey string) (*Groq, error) {
 	if apiKey == "" {
 		apiKey = os.Getenv("GROQ_API_KEY")
 		if apiKey == "" {
-			return nil, errors.New("groq api key not found")
+			return nil, ErrAPIKeyNotFound
 		}
 	}
 
@@ -102,38 +101,6 @@ func (s *Groq) runGroqInference(model *Model, message string) (*Response, error)
 
 	return &Response{Completion: res.Choices[0].Message.Content}, nil
 }
-
-//func (s *Groq) runGroqInferenceGemmaFamily(message string, model *Model) (*Response, error) {
-//
-//}
-//
-//func (s *Groq) runGroqInferenceLlamaFamily(message string, model *Model) (*Response, error) {
-//	res, err := s.client.CreateChatCompletion(
-//		context.Background(),
-//		openai.ChatCompletionRequest{
-//			Model: model.ID,
-//			Messages: []openai.ChatCompletionMessage{
-//				{Role: openai.ChatMessageRoleUser, Content: message},
-//			},
-//		})
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return &Response{Completion: res.Choices[0].Message.Content}, nil
-//}
-//
-//func (s *Groq) runGroqInferenceMixtralFamily(message string, model *Model) (*Response, error) {
-//
-//}
-//
-//func (s *Groq) runGroqInferenceR1Family(message string, model *Model) (*Response, error) {
-//
-//}
-//
-//func runGroqInferece[A, B any](groq *Groq, withModel *Model, withData A, withParser func(B) string) (*Response, error) {
-//	res, err := groq.client
-//}
 
 func (s *Groq) Measure(model *Model, prompt *prompt.Prompt) (*Metric, error) {
 	return measure(s, model, prompt)

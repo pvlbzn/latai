@@ -1,10 +1,16 @@
 package provider
 
 import (
+	"errors"
 	"strings"
 	"time"
 
 	"github.com/pvlbzn/latai/internal/prompt"
+)
+
+var (
+	ErrAPIKeyNotFound = errors.New("API key not found")
+	ErrAPIKeyInvalid  = errors.New("API key is invalid")
 )
 
 // Provider is a core interface for each provider implementation

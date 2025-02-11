@@ -44,10 +44,8 @@ func NewTUIModel() (*TUIModel, error) {
 	bedrock, err := initializeProvider(
 		l,
 		provider.ModelProviderBedrock,
-		// TODO: get default profiles
 		func() (provider.Provider, error) {
-
-			return provider.NewBedrock(provider.DefaultAWSRegion, provider.DefaultAWSProfile)
+			return provider.NewBedrock("", "")
 		})
 	if err == nil {
 		providers = append(providers, bedrock)

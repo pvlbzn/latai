@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"github.com/pvlbzn/latai/internal/prompt"
 	"github.com/sashabaranov/go-openai"
 	"log/slog"
@@ -19,7 +18,7 @@ func NewOpenAI(apiKey string) (*OpenAI, error) {
 	if apiKey == "" {
 		apiKey = os.Getenv("OPENAI_API_KEY")
 		if apiKey == "" {
-			return nil, errors.New("openai api key not found")
+			return nil, ErrAPIKeyNotFound
 		}
 	}
 
