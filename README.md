@@ -69,6 +69,30 @@ aws bedrock \
 Substitute `REGION` and `PROFILE` with your data. You can optionally pipe into `jq` to make output more readable.
 
 
+## Prompts
+
+Latai uses a set 3 pre-defined prompts by default. They are just good enough to measure latency to model and back. E.g. `Respond with a single word: "optimistic".`. You can find them [here](https://github.com/pvlbzn/latai/tree/main/internal/prompt/prompts). Three pre-defined prompts meaning that by default all sampling happens with 3 runs.
+
+If you  need to measure compute time, or performance with your particular prompts, then you can add your own into `~/.latai` directory.
+
+```shell
+# Create a directory where prompts are stored.
+mkdir -p ~/.latai/prompts
+
+# Create your prompts in there.
+cd ~/.latai/prompts
+touch p1.prompt
+
+# Or create many.
+touch {p1, p2, p3, p4, p5}.prompt
+```
+
+You can create any number of prompts you wish, just mind throttling and rate limiting. All prompts should have `.prompt` postfix, files with other postfixes will be ignored.
+
+
+
+
+
 # Latency Measurement Strategy
 
 
