@@ -15,13 +15,22 @@ Latai’s TUI is structured into three distinct views:
 
 # Usage
 
-## Installing
+TLDR version (click on links to navigate to documentation sections):
+1. [Install](#installation).
+2. Check [your keys](#api-keys) in environment.
+   * `OPENAI_API_KEY` for OpenAI models.
+   * `GROQ_API_KEY` for Groq models.
+   * `AWS_PROFILE` for AWS Bedrock
+3. Run `latai`.
+
+
+## Installation
 
 Two installation methods are available.
 
 ### Releases
 
-Select release at [releases page](https://github.com/pvlbzn/latai/releases) and download file which fits your platform. If not sure what release to download, always get the latest one.
+Select release at [releases page](https://github.com/pvlbzn/latai/releases)🔗 and download file which fits your platform. If not sure what release to download, always get the latest one.
 
 Supported platforms:
 * Mac
