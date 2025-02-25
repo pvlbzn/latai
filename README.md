@@ -1,13 +1,42 @@
 # `latai` Generative AI Latency Measurement TUI
 
+![Demo](docs/latai-demo-1.gif)
+
+TUI separated into 3 views. 
+
+The first view is the main **Table** of models. When `latai` starts it checks and verifies your access keys. It loads models of providers which passed verification check. If provider key is missing `latai` will print a message about it in **Events** view.
+
+Second view is **Information** panel. It shows details about the run. It comes in handy when you have many prompts to run - it shows jitter, average, min and max latency.
+
+The last view is **Events** panel where you can see all logs. `latai` runs measurement in parallel in non-blocking way, therefore you can check in logs what going on right now. It also outputs error messages if any.
+
 # Usage
 
-Latai currently supports following providers:
-* OpenAI
-* Groq
-* Bedrock
+## Installing
 
-If you need to add other providers and/or models read Contribution section.
+Two installation methods are available.
+
+### Releases
+
+Select release at [releases page](https://github.com/pvlbzn/latai/releases) and download file which fits your platform. If not sure what release to download, always get the latest one.
+
+Supported platforms:
+* Mac
+* Linux
+* Windows
+
+
+### Installing via Go tooling
+
+For this one you need Go and its tooling to be installed.
+
+```shell
+# Install
+go install github.com/pvlbzn/latai
+
+# Run
+latai
+```
 
 ## API Keys
 To access LLMs Latai has to have access to API keys. Each provider is optional. By default, Latai loads all providers and verifies their keys. If keys aren't found provider is not loaded. Therefore, if you don't need some provider just don't add its key. 
