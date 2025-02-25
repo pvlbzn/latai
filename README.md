@@ -200,9 +200,26 @@ You can fork this repository and add required provisioned models by adding their
 
 ## Adding a New Provider
 
-All providers reside at [provider package](internal/provider)
+All providers reside at [provider package](internal/provider). There is one main interface defined at [`provider.go`](internal/provider/provider.go) file.
 
-## Adding a New Model to Existing Provider
+```go
+// Comments omitted for brevity, check source file 
+// to see full version.
+type Provider interface {
+	Name() ModelProvider
+	GetLLMModels(filter string) []*Model
+	Measure(model *Model, prompt *prompt.Prompt) (*Metric, error)
+	Send(message string, to *Model) (*Response, error)
+	VerifyAccess() bool
+}
+```
+
+If a struct satisfies this `Provider` interface it is ready to be used along with all other providers.
+
+If provider you are adding is OpenAI API compliant check [`groq.go`](internal/provider/groq.go) implementation.
+
+Do not forget to add tests. You can see implementation of tests inside of [`provider` package](internal/provider).
+
 
 
 # Troubleshooting
