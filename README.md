@@ -1,14 +1,17 @@
 # `latai` Generative AI Latency Measurement TUI
 
-![Demo](docs/latai-demo-1.gif)
+Latai is a Terminal UI application designed to evaluate the performance of Generative AI providers using either default prompts or your own custom inputs.
 
-TUI separated into 3 views. 
+<img src="docs/latai-demo-1.gif" height="650">
 
-The first view is the main **Table** of models. When `latai` starts it checks and verifies your access keys. It loads models of providers which passed verification check. If provider key is missing `latai` will print a message about it in **Events** view.
+Latai’s TUI is structured into three distinct views:
 
-Second view is **Information** panel. It shows details about the run. It comes in handy when you have many prompts to run - it shows jitter, average, min and max latency.
+1. **Table View** – This is the main interface displaying the list of AI models. Upon startup, `latai` verifies your access keys and loads models from providers that pass the verification. If a key is missing, a notification appears in the **Events** panel.
 
-The last view is **Events** panel where you can see all logs. `latai` runs measurement in parallel in non-blocking way, therefore you can check in logs what going on right now. It also outputs error messages if any.
+2. **Information Panel** – This section provides detailed insights into the current run. It’s especially useful when running multiple prompts, as it displays key performance metrics such as jitter, average latency, and min/max latency.
+
+3. **Events Panel** – This panel logs all system activities in real-time. Since `latai` executes performance measurements in parallel without blocking the UI, you can monitor ongoing processes and check for any error messages here.
+
 
 # Usage
 
