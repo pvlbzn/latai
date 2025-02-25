@@ -1,3 +1,6 @@
 # IDE specific files
 .idea
 .code
+
+# Don't push binaries
+dist/*
