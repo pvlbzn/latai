@@ -1,4 +1,4 @@
-# Generative AI Latency Measurement TUI
+# `latai` Generative AI Latency Measurement TUI
 
 # Usage
 
@@ -6,6 +6,8 @@ Latai currently supports following providers:
 * OpenAI
 * Groq
 * Bedrock
+
+If you need to add other providers and/or models read Contribution section.
 
 ## API Keys
 To access LLMs Latai has to have access to API keys. Each provider is optional. By default, Latai loads all providers and verifies their keys. If keys aren't found provider is not loaded. Therefore, if you don't need some provider just don't add its key. 
@@ -54,6 +56,15 @@ Latai will load your AWS profile in following order:
 1. Access `AWS_PROFILE` and `AWS_REGION` from your environment.
 2. If not found default to the default values `AWS_PROFILE=default`, `AWS_REGION=us-east-1`.
 
+To set your profile and region add those:
+
+```shell
+export AWS_PROFILE=
+export AWS_REGION=
+```
+
+Make sure that you either load Latai from the same terminal after exports, or add those exports into your shell `rc` file, e.g. `.bashrc`, `.zshrc`, etc.
+
 > [!NOTE]
 > Make sure you have access to LLM models from your AWS account. They are not enabled by default. You have to navigate to `https://REGION.console.aws.amazon.com/bedrock/home?region=REGION#/modelaccess` and enable models from the console. Make sure to replace `REGION` with your actual region. [Here is the link](https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/modelaccess) for `us-east-1`.
 
@@ -69,7 +80,7 @@ aws bedrock \
 Substitute `REGION` and `PROFILE` with your data. You can optionally pipe into `jq` to make output more readable.
 
 
-## Prompts
+## Prompts: Default and Custom
 
 Latai uses a set 3 pre-defined prompts by default. They are just good enough to measure latency to model and back. E.g. `Respond with a single word: "optimistic".`. You can find them [here](https://github.com/pvlbzn/latai/tree/main/internal/prompt/prompts). Three pre-defined prompts meaning that by default all sampling happens with 3 runs.
 
@@ -91,10 +102,7 @@ You can create any number of prompts you wish, just mind throttling and rate lim
 
 
 
-
-
 # Latency Measurement Strategy
-
 
 **TODO: add description of work**
 
@@ -152,16 +160,19 @@ Verify those with your model provider. This information can be found at provider
 
 Providers:
 * [Groq Rate Limits](https://console.groq.com/docs/rate-limits)
-* TODO OpenAI
-* TODO AWS Bedrock
+* [OpenAI Rate Limits](https://platform.openai.com/docs/guides/rate-limits)
+* AWS Bedrock (read below)
 
 
-## OpenAI
+### OpenAI
 
+OpenAI uses tiered rate limits from 1 to 5. For more details consult their documentation.
 
-## AWS Bedrock
+### AWS Bedrock
 
-### Access
+AWS Bedrock has multiple providers under their name. Before using most of the models you have to request access to them via AWS UI. 
+
+#### Access
 
 > [!NOTE]
 > Make sure you have access to LLM models from your AWS account. They are not enabled by default. You have to navigate to https://REGION.console.aws.amazon.com/bedrock/home?region=REGION#/modelaccess and enable models from the console. Make sure to replace `REGION` with your actual region.
@@ -178,14 +189,24 @@ aws bedrock \
 Substitute `REGION` and `PROFILE` with your data. You can optionally pipe into `jq` to make output more readable.
 
 
-### Models
+#### Models
 
 Even though AWS Bedrock returns lots of models, not all of them can be accessed "as-is". For example AWS Bedrock lists more than 20 Claude-family models, however, only 6 out of them are available without provisioning. Genlat doesn't include models which require special access at the moment.
 
-You can fork this repository and add required provisioned models by adding their ID into `NewBedrock` function [in this file](provider/bedrock.go).
+You can fork this repository and add required provisioned models by adding their ID into `NewBedrock` function [in this file](internal/provider/bedrock.go).
+
+
+# Contributing
+
+## Adding a New Provider
+
+All providers reside at [provider package](internal/provider)
+
+## Adding a New Model to Existing Provider
+
 
 # Troubleshooting
 
 ## `err` as Latency Value
 
-TODO
+Read `Events` block of TUI, it generally explains what went wrong. The most common issues is related to AWS Bedrock due to access to models.
