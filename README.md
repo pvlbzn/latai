@@ -30,12 +30,12 @@ Two installation methods are available.
 
 ### Releases
 
-Select release at [releases page](https://github.com/pvlbzn/latai/releases)🔗 and download file which fits your platform. If not sure what release to download, always get the latest one.
-
-Supported platforms:
-* Mac
-* Linux
-* Windows
+1. **Select a release** from the [Releases Page](https://github.com/pvlbzn/latai/releases) 🔗.
+2. **Download the appropriate file** for your platform:
+   - **Mac**
+   - **Linux**
+   - **Windows**
+3. If you're unsure which release to download, always get the **latest version**.
 
 
 ### Installing via Go tooling
@@ -51,9 +51,14 @@ latai
 ```
 
 ## API Keys
-To access LLMs Latai has to have access to API keys. Each provider is optional. By default, Latai loads all providers and verifies their keys. If keys aren't found provider is not loaded. Therefore, if you don't need some provider just don't add its key. 
 
-TLDR: add following keys and values into your environment and update your terminal environment.
+Latai requires API keys to access LLM providers. Each provider is **optional**—by default, Latai attempts to load all providers and verifies their keys. If a key is missing, the corresponding provider will not be loaded.
+
+If you don’t need a specific provider, simply omit its key.
+
+TLDR:
+1. Add the following API keys and values to your environment.
+2. Update your terminal environment to apply the changes.
 
 ```shell
 # OpenAI API key.
@@ -143,51 +148,21 @@ You can create any number of prompts you wish, just mind throttling and rate lim
 
 
 
-# Latency Measurement Strategy
-
-**TODO: add description of work**
-
-**TODO: add prompts and count their token load for measurements**
-
-LLM providers tend to have a significant latency jitter. Latency varies greatly between calls, and occasionally request may timeout. To provide  a stable means of measurement _multi-sample_ approach is used.
-
-Another point of consideration is prompt caching. Major providers started to roll out this feature around Q3 2024.
-
-**TODO: IMPLEMENT**\
-To make latency measurements as close to real-world as possible Genlat provides a collection of prompts.
-
-> [!NOTE]
-> Prompt caching usually last up to 15 minutes. This is not set in stone number, therefore take this into consideration if running measurements repeatedly.
-
-Collection of prompts can be found at `./prompt/prompts` directory. They are designed to be similar to generate comparable load on LLM, yet different enough to not get cached.
-
-By default, Genlat uses sampling size of 3 for the measurements. That means that it will pick 3 prompts from prompts directory and run them against each LLM. 
-
-Prompt caching:
-- [OpenAI prompt caching](https://platform.openai.com/docs/guides/prompt-caching) [^1]
-- [Anthropic prompt caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching) [^2]
-
-[^1]: OpenAI claims up to 80% reduced latency with prompt caching.
-[^2]: OpenAI claims up to 85% reduced latency with prompt caching for long prompts.
-
-
-## Customizing Prompts
-
-**TODO: IMPLEMENT**\
-You can provide your own prompts by creating `~/.genlat/prompts` directory and putting prompts there. This can be useful for custom use cases where prompts or / and use cases differ from standard ones. Doing so be wary of prompt caching.
-
-
 # Providers & Vendors & Models
 
 Definitions:
-* Provider is a service provider which serves access to model(s) over some API.
-* Vendor is a company-owner of a model which created, trained, and aligned a model.
-* Model is a LLM model with particular properties such as performance, context, languages, etc.
 
+* A **provider** is a service that grants access to models via an API.
+* A **vendor** is the company that owns, develops, trains, and aligns a model.
+* A **model** is an LLM with specific properties such as performance, context length, and supported languages.
 
-Providers are services which serve models over API. Models can be separated by families, for example Claude family of models. Some providers are mono-family, e.g. OpenAI, and follow single unified API for all underlying models. Other providers are multi-family, e.g. AWS Bedrock. Multi-family providers have their API, however particular format of communication depends on the model's family. Vendors may have one or more families of models. Families generally defined by their API, for example if model A and B have the same API and belong to the same vendor then they belong to the same family.
+Providers serve models through APIs. Models can be grouped into families, such as the Claude family. Some providers are **mono-family**, like OpenAI, which uses a single unified API for all its models. Others are **multi-family**, like AWS Bedrock, which has its own API, but the communication format varies depending on the model family.
 
-Genlat aggregates models by provider, because provider is the root of the relation, and it is what runs models. However, more frequently than not a model can run on a multiple providers. Thus, there are two APIs - provider API, and model API. To simplify provider API is responsible for transport layer, and model API is responsible for data format. 
+Vendors may have one or more model families, typically defined by their API. For example, if models A and B share the same API and belong to the same vendor, they are considered part of the same family.
+
+Latai organizes models by provider, as the provider is the core entity that runs the models. However, models can often be available through multiple providers. This distinction creates two API layers:
+* The provider API, which handles transport.
+* The model API, which defines the data format.
 
 
 ## Rate Limits
